@@ -26,7 +26,7 @@ def get_words(text):
 	return [word.strip().lower() for word in word_split.split(text)]
 
 data_path = "../data/"
-in_file = open(data_path+"cooking.csv", encoding='utf8')
+in_file = open(data_path+"test.csv", encoding='utf8')
 out_file = open(data_path+"sub_freq.csv", "w", encoding='utf8')
 reader = csv.DictReader(in_file)
 writer = csv.writer(out_file)
