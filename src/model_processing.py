@@ -67,7 +67,7 @@ def makeEmbedding(inputTable):
 	print(embdWeights.shape)
 	
 	vocabDict = dict([(k, v.index) for k, v in w2vModel.wv.vocab.items()])
-	logger.info('  Vocabulary size ' % (len(vocabDict)))
+	logger.info('  Vocabulary size %i ' % (len(vocabDict)))
 # 	print(vocabDict)
 	import operator
 	sorted_word = sorted(vocabDict.items(), key=operator.itemgetter(1), reverse=False)

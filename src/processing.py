@@ -11,7 +11,7 @@ from model_processing import getModel, makeEmbedding
 from model_eval import Evaluator
 
 pdtraining = '../data/cooking.csv'
-pdtest = '../data/biology.csv'
+pdtest = '../data/robotics.csv'
 output_dir = '../output'
 
 logger = logging.getLogger(__name__)
