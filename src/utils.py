@@ -76,3 +76,21 @@ class BColors:
 	@staticmethod
 	def cleared(s):
 		return re.sub("\033\[[0-9][0-9]?m", "", s)
+
+def red(message):
+	return BColors.RED + str(message) + BColors.ENDC
+
+def b_red(message):
+	return BColors.BRED + str(message) + BColors.ENDC
+
+def blue(message):
+	return BColors.BLUE + str(message) + BColors.ENDC
+
+def b_yellow(message):
+	return BColors.BYELLOW + str(message) + BColors.ENDC
+
+def green(message):
+	return BColors.GREEN + str(message) + BColors.ENDC
+
+def b_green(message):
+	return BColors.BGREEN + str(message) + BColors.ENDC

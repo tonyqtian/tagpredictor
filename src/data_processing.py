@@ -5,6 +5,7 @@ Created on Mar 17, 2017
 '''
 
 import pandas as pd
+import numpy as np
 import re
 from bs4 import BeautifulSoup
 import logging
@@ -43,15 +44,20 @@ def tableMerge(tableList):
 
 def tokenizeIt(table, clean=False):
 	tokenizedTable = []
+	maxLen = 0
 	for content in tqdm(table):
 		if clean:
 			text = stripTagsAndUris(content)
 			text = get_words(text)
 			tokenizedTable.append(text)
+			if len(text) > maxLen:
+				maxLen = len(text)
 		else:
 			text = content.split(' ')
 			tokenizedTable.append(text)
-	return tokenizedTable		
+			if len(text) > maxLen:
+				maxLen = len(text)
+	return tokenizedTable, maxLen		
 	
 def createVocab(tableList):
 	logger.info(' Creating vocabulary ')
@@ -99,10 +105,15 @@ def word2num(contentTable, vocab, maxLen):
 			if word in vocab:
 				w2num.append(vocab[word])
 			else:
-				w2num.append(vocab['<unk>'])
+				w2num.append(vocab[''])
 				unk_hit += 1
 			totalword += 1
 		data.append(w2num)
 	# pad to np array	
 	np_ary = pad_sequences(data, maxlen=maxLen)
 	return np_ary
+
+def to_categorical2D(y, nb_classes=None):
+	if not nb_classes:
+		nb_classes = y.max()
+	return (np.arange(nb_classes) == y[:,:,None]-1).astype(int)
