@@ -17,7 +17,7 @@ class Evaluator(Callback):
 		self.test_y = test_y
 		self.best_test = -1
 		self.best_epoch = -1
-		self.batch_size = 1024
+		self.batch_size = 512
 		self.metric = metric
 		self.val_metric = 'val_' + metric
 		self.timestr = timestr
