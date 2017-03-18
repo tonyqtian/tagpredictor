@@ -34,12 +34,12 @@ def stripTagsAndUris(x):
 		return ""
 
 vocab = set()
-with open('../data/glove.6B.50d.40w.txt', 'r', encoding='utf8') as fhd:
-	for line in tqdm(fhd):
-		vocab.add(line.strip().split()[0])
 # with open('../data/googleWord2Vec_300M_vocablist.txt', 'r', encoding='utf8') as fhd:
 # 	for line in tqdm(fhd):
-# 		vocab.add(line.strip())
+# 		vocab.add(line.strip().split()[0])
+with open('../data/googleWord2Vec_300M_vocablist.txt', 'r', encoding='utf8') as fhd:
+	for line in tqdm(fhd):
+		vocab.add(line.strip())
 print(len(vocab))
 
 cooking = pd.read_csv("../data/physics_full_sub.csv")
@@ -50,7 +50,7 @@ fulllist = zip(cooking.title, cooking.content, cooking.tags)
 del cooking
 contentSet = set()
 tagSet = set()
-for (title, content, tag) in fulllist:
+for (title, content, tag) in tqdm(fulllist):
 # 	tag = tag.replace('-','_')
 	ws = set(tag.split(' '))
 	tagSet.update(ws)

@@ -29,7 +29,7 @@ def stripTagsAndUris(x):
 	else:
 		return ""
 
-cooking = pd.read_csv("../data/physics_full_sub.csv")
+cooking = pd.read_csv("../data/biology.csv")
 totalen = len(cooking.tags)
 print('Total size: ', totalen)
 fulllist = list(zip(cooking.title, cooking.content, cooking.tags))
@@ -84,7 +84,7 @@ tagHit = {}
 tagPartial = {}
 frqTagHit = {}
 frqTagPartial = {}
-for (title, content, tag) in tqdm(fulllist):
+for (title, content, tag) in fulllist:
 	ws = tag.split(' ')
 	tagset.update(ws)
 	hitset = contentset.intersection(set(ws))

@@ -8,6 +8,8 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 import logging
+from keras.preprocessing.sequence import pad_sequences
+from tqdm._tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ def tableMerge(tableList):
 
 def tokenizeIt(table, clean=False):
 	tokenizedTable = []
-	for content in table:
+	for content in tqdm(table):
 		if clean:
 			text = stripTagsAndUris(content)
 			text = get_words(text)
@@ -88,4 +90,19 @@ def createVocab(tableList):
 	return vocabDict, vocabReverseDict, maxLen
 
 def word2num(contentTable, vocab, maxLen):
-	pass
+	unk_hit = 0
+	totalword = 0
+	data = []
+	for line in contentTable:
+		w2num = []
+		for word in line:			
+			if word in vocab:
+				w2num.append(vocab[word])
+			else:
+				w2num.append(vocab['<unk>'])
+				unk_hit += 1
+			totalword += 1
+		data.append(w2num)
+	# pad to np array	
+	np_ary = pad_sequences(data, maxlen=maxLen)
+	return np_ary
