@@ -31,8 +31,9 @@ def getModel(input_length, output_length, vocab_size, embd, embd_dim, embd_train
 	sequence = Input(shape=(input_length,), dtype='int32')
 	x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
 # 	x = LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)(x)
+	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
 	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
-	x = Dense(rnn_dim, activation='relu')(x)
+	x = Dense(rnn_dim*2, activation='relu')(x)
 	
 	# decoder
 	pred = RepeatVector(output_length)(x)
@@ -66,13 +67,14 @@ def makeEmbedding(inputTable):
 	print(embdWeights.shape)
 	
 	vocabDict = dict([(k, v.index) for k, v in w2vModel.wv.vocab.items()])
-	print(vocabDict)
+	logger.info('  Vocabulary size ' % (len(vocabDict)))
+# 	print(vocabDict)
 	import operator
 	sorted_word = sorted(vocabDict.items(), key=operator.itemgetter(1), reverse=False)
 	vocabReverseDict = []
 	for word, _ in sorted_word:
 		vocabReverseDict.append(word)
-	print(vocabReverseDict)
+# 	print(vocabReverseDict)
 	# eval will take hours without word limiting
 # 	w2vModel.accuracy('../data/questions-words.txt')
 	del w2vModel
