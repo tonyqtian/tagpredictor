@@ -55,5 +55,5 @@ rnnmodel.summary()
 # train and test model
 evl = Evaluator(output_dir, timestr, 'categorical_accuracy', test_x, test_y)
 earlystop = EarlyStopping(patience = 5, verbose=1, mode='auto')
-rnnmodel.fit(train_x, train_y, validation_split=0.2, batch_size=256, nb_epoch=20, callbacks=[earlystop, evl])
+rnnmodel.fit(train_x, train_y, validation_split=0.2, batch_size=1024, nb_epoch=20, callbacks=[earlystop, evl])
 # rnnmodel.fit(train_x, train_y, validation_split=0.2, batch_size=8, nb_epoch=2)
