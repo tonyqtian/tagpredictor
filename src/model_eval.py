@@ -11,13 +11,13 @@ logger = logging.getLogger(__name__)
 
 class Evaluator(Callback):
 	
-	def __init__(self, out_dir, timestr, metric, test_x, test_y):
+	def __init__(self, args, out_dir, timestr, metric, test_x, test_y):
 		self.out_dir = out_dir
 		self.test_x = test_x
 		self.test_y = test_y
 		self.best_test = -1
 		self.best_epoch = -1
-		self.batch_size = 512
+		self.batch_size = args.eval_batch_size
 		self.metric = metric
 		self.val_metric = 'val_' + metric
 		self.timestr = timestr

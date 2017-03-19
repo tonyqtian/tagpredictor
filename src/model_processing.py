@@ -16,21 +16,10 @@ from gensim.models.word2vec import Word2Vec
 logger = logging.getLogger(__name__)
 
 def getModel(input_length, output_length, vocab_size, embd, embd_dim, embd_trainable=True, rnn_opt='cpu', rnn_dim=32):
-# 	if embd == None:
-# 		my_init = 'uniform'
-# 		logger.info(' Use default initializing embedding')
-# 	else:
-# 		if embd.shape == (vocab_size, embd_dim):
-# 			def my_init(embd, name=None):
-# 				return K.variable(embd, name=name)
-# 			logger.info(' Use pre-trained embedding')
-# 		else:
-# 			raise ValueError('Incorrect embedding shape', embd.shape, ' expect ', (vocab_size, embd_dim))
 		
 	# encoder
 	sequence = Input(shape=(input_length,), dtype='int32')
 	x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
-# 	x = LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)(x)
 	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
 	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
 	x = Dense(rnn_dim*2, activation='relu')(x)
@@ -43,7 +32,7 @@ def getModel(input_length, output_length, vocab_size, embd, embd_dim, embd_train
 	model = Model(input=sequence, output=pred)
 	return model
 
-def makeEmbedding(inputTable):
+def makeEmbedding(args, inputTable):
 	sentenceList = []
 	for tbl in inputTable:
 		sentenceList.extend(tbl)
@@ -61,7 +50,7 @@ def makeEmbedding(inputTable):
 				yield line
 				
 	sentences = SentenceGenerator(sentenceList)
-	w2vModel = Word2Vec(sentences, min_count=2, size=100)
+	w2vModel = Word2Vec(sentences, min_count=2, size=args.embd_dim)
 # 	w2vModel.save('../data/embd_model.bin')
 	embdWeights = w2vModel.wv.syn0
 	print(embdWeights.shape)

@@ -95,7 +95,7 @@ def createVocab(tableList):
 	logger.info('  vocab size %i ' % len(vocabReverseDict))
 	return vocabDict, vocabReverseDict, maxLen
 
-def word2num(contentTable, vocab, maxLen):
+def word2num(contentTable, vocab, maxLen, postpad=False):
 	unk_hit = 0
 	totalword = 0
 	data = []
@@ -110,7 +110,10 @@ def word2num(contentTable, vocab, maxLen):
 			totalword += 1
 		data.append(w2num)
 	# pad to np array	
-	np_ary = pad_sequences(data, maxlen=maxLen)
+	if postpad:
+		np_ary = pad_sequences(data, maxlen=maxLen, padding='post')
+	else:
+		np_ary = pad_sequences(data, maxlen=maxLen, padding='pre')
 	return np_ary
 
 def to_categorical2D(y, nb_classes=None):
