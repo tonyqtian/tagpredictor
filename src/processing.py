@@ -10,7 +10,7 @@ from data_processing import get_pdTable, tableMerge, tokenizeIt, word2num, to_ca
 from model_processing import getModel, makeEmbedding
 from model_eval import Evaluator
 
-pdtraining = '../data/rebotics.csv'
+pdtraining = '../data/robotics.csv'
 pdtest = '../data/physics_sample.csv'
 output_dir = '../output'
 
