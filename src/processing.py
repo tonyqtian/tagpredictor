@@ -10,8 +10,8 @@ from data_processing import get_pdTable, tableMerge, tokenizeIt, word2num, to_ca
 from model_processing import getModel, makeEmbedding
 from model_eval import Evaluator
 
-pdtraining = '../data/cooking.csv'
-pdtest = '../data/robotics.csv'
+pdtraining = '../data/rebotics.csv'
+pdtest = '../data/physics_sample.csv'
 output_dir = '../output'
 
 logger = logging.getLogger(__name__)
