@@ -19,7 +19,7 @@ def train(args):
 	timestr = time.strftime("%Y%m%d-%H%M%S-")
 	output_dir = args.out_dir_path + '/' + time.strftime("%m%d")
 	mkdir(output_dir)
-	timestr = setLogger(timestr, out_dir=output_dir)
+	setLogger(timestr, out_dir=output_dir)
 	
 	# process train and test data
 	_, train_title, train_content, train_tag = get_pdTable(args.train_path)
