@@ -5,10 +5,10 @@ Created on Mar 17, 2017
 '''
 import logging, time
 from keras.callbacks import EarlyStopping
-from utils import setLogger, mkdir
-from data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D
-from model_processing import getModel, makeEmbedding
-from model_eval import Evaluator
+from src.utils import setLogger, mkdir
+from src.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D
+from src.model_processing import getModel, makeEmbedding
+from src.model_eval import Evaluator
 
 logger = logging.getLogger(__name__)
 
