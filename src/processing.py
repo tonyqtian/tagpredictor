@@ -3,6 +3,9 @@ Created on Mar 17, 2017
 
 @author: tonyq
 '''
+import matplotlib
+matplotlib.use('Agg')
+
 import logging, time
 from keras.callbacks import EarlyStopping
 from src.utils import setLogger, mkdir
