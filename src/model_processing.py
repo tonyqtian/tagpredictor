@@ -15,7 +15,7 @@ from gensim.models.word2vec import Word2Vec
 
 logger = logging.getLogger(__name__)
 
-def getModel(input_length, output_length, vocab_size, embd, embd_dim, embd_trainable=True, rnn_opt='cpu', rnn_dim=32):
+def getModel(input_length, output_length, vocab_size, pred_size, embd, embd_dim, embd_trainable=True, rnn_opt='cpu', rnn_dim=32):
 		
 	# encoder
 	sequence = Input(shape=(input_length,), dtype='int32')
@@ -27,7 +27,7 @@ def getModel(input_length, output_length, vocab_size, embd, embd_dim, embd_train
 	# decoder
 	pred = RepeatVector(output_length)(x)
 	pred = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(pred)
-	pred = TimeDistributed(Dense(vocab_size, activation='softmax'))(pred)
+	pred = TimeDistributed(Dense(pred_size, activation='softmax'))(pred)
 	
 	model = Model(input=sequence, output=pred)
 	return model
@@ -36,10 +36,7 @@ def makeEmbedding(args, inputTable):
 	sentenceList = []
 	for tbl in inputTable:
 		sentenceList.extend(tbl)
-	print(len(inputTable))
-	print(len(inputTable[0]))
-	print(len(inputTable[1]))
-	print(len(sentenceList))
+	logger.info('  Total %i lines info for word2vec processing ' % (len(sentenceList)))
 	
 	class SentenceGenerator(object):
 		def __init__(self, sentList):

@@ -37,6 +37,8 @@ parser.add_argument("--earlystop", dest="earlystop", type=int, metavar='<int>', 
 parser.add_argument("--verbose", dest="verbose", type=int, metavar='<int>', default=1, help="Show training process bar during train and val")
 parser.add_argument("--valid-split", dest="valid_split", type=float, metavar='<float>', default=0.2, help="Split validation set from training set (default=0.0)")
 parser.add_argument("--mem-opt", dest="rnn_opt", type=str, metavar='<str>', default='gpu', help="RNN consume_less (cpu|mem|gpu) (default=gpu)")
+parser.add_argument("--eval-on-epoch", dest="eval_on_epoch", action='store_true', help="Test after every epoch")
+parser.add_argument("--show-eval-pred", dest="show_evl_pred", type=int, metavar='<int>', default=0, help="Show <num> predicts after every test pred")
 args = parser.parse_args()
 
 from processing import train

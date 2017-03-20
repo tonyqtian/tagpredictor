@@ -6,7 +6,7 @@ Created on Mar 17, 2017
 import logging
 from keras.callbacks import EarlyStopping
 from utils import setLogger, mkdir
-from data_processing import get_pdTable, tableMerge, tokenizeIt, word2num, to_categorical2D
+from data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D
 from model_processing import getModel, makeEmbedding
 from model_eval import Evaluator
 
@@ -29,28 +29,34 @@ def train(args):
 	train_tag, _ = tokenizeIt(train_tag)
 	test_tag, _ = tokenizeIt(test_tag)
 	maxInputLength = max(train_maxLen, test_maxLen)
-	outputLength = 5
+# 	outputLength = 5
 	
 	embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-	# vocabDict, vocabReverseDict, maxInputLength = createVocab([train_body, test_body])
+	pred_vocabDict, pred_vocabReverseDict, outputLength = createVocab([train_tag,], min_count=0)
 	# logger.info(vocabDict)
-	# logger.info(vocabReverseDict)
+	logger.info(pred_vocabReverseDict)
 	
 	# word to padded numerical np array
 	train_x = word2num(train_body, vocabDict, maxInputLength)
 	test_x = word2num(test_body, vocabDict, maxInputLength)
-	train_y = word2num(train_tag, vocabDict, outputLength, postpad=True)
-	train_y = to_categorical2D(train_y, len(vocabDict))
-	test_y = word2num(test_tag, vocabDict, outputLength, postpad=True)
-	test_y = to_categorical2D(test_y, len(vocabDict))
+	train_y = word2num(train_tag, pred_vocabDict, outputLength, postpad=True)
+	train_y = to_categorical2D(train_y, len(pred_vocabDict))
+	test_y = word2num(test_tag, pred_vocabDict, outputLength, postpad=True)
+	test_y = to_categorical2D(test_y, len(pred_vocabDict))
 	
 	# create model 
-	rnnmodel = getModel(maxInputLength, outputLength, len(vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
+	rnnmodel = getModel(maxInputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
 	rnnmodel.compile(loss='categorical_crossentropy', optimizer=args.optimizer, metrics=['categorical_accuracy'])
 	rnnmodel.summary()
 	
 	# train and test model
-	evl = Evaluator(args, output_dir, timestr, 'categorical_accuracy', test_x, test_y)
-	earlystop = EarlyStopping(patience = args.earlystop, verbose=1, mode='auto')
-	rnnmodel.fit(train_x, train_y, validation_split=args.valid_split, batch_size=args.train_batch_size, nb_epoch=args.epochs, callbacks=[earlystop, evl])
-	# rnnmodel.fit(train_x, train_y, validation_split=0.2, batch_size=8, nb_epoch=2)
+	myCallbacks = []
+	if args.eval_on_epoch:
+		evl = Evaluator(args, output_dir, timestr, 'categorical_accuracy', test_x, test_y, vocabReverseDict, pred_vocabReverseDict)
+		myCallbacks.append(evl)
+	if args.earlystop:
+		earlystop = EarlyStopping(patience = args.earlystop, verbose=1, mode='auto')
+		myCallbacks.append(earlystop)
+	rnnmodel.fit(train_x, train_y, validation_split=args.valid_split, batch_size=args.train_batch_size, nb_epoch=args.epochs, callbacks=myCallbacks)
+	if not args.eval_on_epoch:
+		rnnmodel.evaluate(test_x, test_y, batch_size=args.eval_batch_size)

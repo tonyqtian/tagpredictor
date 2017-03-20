@@ -59,7 +59,7 @@ def tokenizeIt(table, clean=False):
 				maxLen = len(text)
 	return tokenizedTable, maxLen		
 	
-def createVocab(tableList):
+def createVocab(tableList, min_count=1):
 	logger.info(' Creating vocabulary ')
 	contentList = []
 	for list1 in tableList:
@@ -81,10 +81,10 @@ def createVocab(tableList):
 	sorted_word_freqs = sorted(wdFrq.items(), key=operator.itemgetter(1), reverse=True)
 	vocab_size = 0
 	for _, freq in sorted_word_freqs:
-		if freq > 1:
+		if freq > min_count:
 			vocab_size += 1
-	vocabDict = {'<pad>':0, '<unk>':1}
-	vocabReverseDict = ['<pad>', '<unk>']
+	vocabDict = {'':0,}
+	vocabReverseDict = ['',]
 	vocabLen = len(vocabDict)
 	index = vocabLen	
 	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:
