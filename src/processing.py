@@ -30,7 +30,7 @@ def train(args):
 	train_tag, _ = tokenizeIt(train_tag)
 	test_tag, _ = tokenizeIt(test_tag)
 # 	inputLength = max(train_maxLen, test_maxLen)
-	inputLength = 600
+	inputLength = 450
 	outputLength = 5
 	
 	if args.w2v:

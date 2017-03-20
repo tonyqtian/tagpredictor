@@ -40,7 +40,8 @@ class Evaluator(Callback):
 		if self.evl_pred:
 			pred = model.predict(self.test_x[:self.evl_pred], batch_size=self.evl_pred)
 			pred = argmax(pred, axis=2)
-			self.print_pred(self.test_x[:self.evl_pred], pred)
+			reals = argmax(self.test_y[:self.evl_pred], axis=2)
+			self.print_pred(self.test_x[:self.evl_pred], pred, reals)
 
 	def on_epoch_end(self, epoch, logs={}):
 		self.losses.append(logs.get('loss'))
@@ -66,11 +67,17 @@ class Evaluator(Callback):
 		plt.savefig(self.out_dir + '/' + self.timestr + 'LossAccuracy.png')
 		plt.close()
 
-	def print_pred(self, infers, preds):
-		for (infr, pred) in zip(infers, preds):
-			infr_line = [self.reVocab[int(strin)] for strin in infr]
-			pred_line = [self.pred_reVocab[int(strin)] for strin in pred]
-			logger.info('[Test]  Line: %s, pred: %s' % (' '.join(infr_line).strip(), ' '.join(pred_line).strip()))
+	def print_pred(self, infers, preds, reals):
+		for (infr, pred, real) in zip(infers, preds, reals):
+			infr_line = []
+			for strin in infr:
+				if not strin == 0:
+					infr_line.append(self.reVocab[strin])
+			pred_line = [self.pred_reVocab[strin] for strin in pred]
+			real_line = [self.pred_reVocab[strin] for strin in real]
+			logger.info('[Test]  Line: %s ' % ' '.join(infr_line) )
+			logger.info('[Test]  Pred: %s ' % ' '.join(pred_line) )
+			logger.info('[Test]  True: %s ' % ' '.join(real_line) )
 				
 	def print_info(self, epoch):
 		logger.info('[Test]  Epoch: %i' % epoch)
