@@ -23,8 +23,10 @@ def getModel(input_length, output_length, vocab_size, pred_size, embd, embd_dim,
 		x = Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable)(sequence)
 	else:
 		x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
-	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
-	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
+# 	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
+# 	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
+	x = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(x)
+	x = LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)(x)
 	x = Dense(rnn_dim, activation='relu')(x)
 	
 	# decoder
