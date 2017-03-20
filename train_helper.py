@@ -40,6 +40,7 @@ parser.add_argument("--mem-opt", dest="rnn_opt", type=str, metavar='<str>', defa
 parser.add_argument("--eval-on-epoch", dest="eval_on_epoch", action='store_true', help="Test after every epoch")
 parser.add_argument("--show-eval-pred", dest="show_evl_pred", type=int, metavar='<int>', default=0, help="Show <num> predicts after every test pred")
 parser.add_argument("--w2v-embedding", dest="w2v", action='store_true', help="Use pre-trained word2vec embedding")
+parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar='<float>', default=0.01, help="Optimizer learning rate")
 args = parser.parse_args()
 
 from src.processing import train

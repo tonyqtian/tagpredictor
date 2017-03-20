@@ -54,7 +54,9 @@ def train(args):
 	
 	# create model 
 	rnnmodel = getModel(inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
-	rnnmodel.compile(loss='categorical_crossentropy', optimizer=args.optimizer, metrics=['categorical_accuracy'])
+	from keras.optimizers import RMSprop
+	optimizer = RMSprop(lr=args.learning_rate)
+	rnnmodel.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 	rnnmodel.summary()
 	
 	# train and test model
