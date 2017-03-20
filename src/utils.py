@@ -4,16 +4,14 @@ Created on Mar 17, 2017
 @author: tonyq
 '''
 import logging
-import time
 import sys, os, errno
 import re
 
 #-----------------------------------------------------------------------------------------------------------#
 
-def setLogger(onscreen=True, out_dir=None):
+def setLogger(timestr, onscreen=True, out_dir=None):
 	logger = logging.getLogger()
 	logger.setLevel(logging.DEBUG)
-	timestr = time.strftime("%Y%m%d-%H%M%S-")
 	if onscreen:
 		console_format = BColors.OKBLUE + '[%(levelname)s]' + BColors.ENDC + ' (%(name)s) %(message)s'
 		#datefmt='%Y-%m-%d %Hh-%Mm-%Ss'
@@ -27,7 +25,6 @@ def setLogger(onscreen=True, out_dir=None):
 		log_file.setLevel(logging.DEBUG)
 		log_file.setFormatter(logging.Formatter(file_format))
 		logger.addHandler(log_file)
-	return timestr
 
 #-----------------------------------------------------------------------------------------------------------#
 

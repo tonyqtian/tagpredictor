@@ -6,7 +6,7 @@ Created on Mar 17, 2017
 
 import pandas as pd
 import numpy as np
-import re
+import re, sys
 from bs4 import BeautifulSoup
 import logging
 from keras.preprocessing.sequence import pad_sequences
@@ -45,7 +45,7 @@ def tableMerge(tableList):
 def tokenizeIt(table, clean=False):
 	tokenizedTable = []
 	maxLen = 0
-	for content in tqdm(table):
+	for content in tqdm(table, file=sys.stdout):
 		if clean:
 			text = stripTagsAndUris(content)
 			text = get_words(text)

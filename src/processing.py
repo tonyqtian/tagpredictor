@@ -3,7 +3,7 @@ Created on Mar 17, 2017
 
 @author: tonyq
 '''
-import logging
+import logging, time
 from keras.callbacks import EarlyStopping
 from utils import setLogger, mkdir
 from data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D
@@ -13,9 +13,10 @@ from model_eval import Evaluator
 logger = logging.getLogger(__name__)
 
 def train(args):
-	output_dir = args.out_dir_path
+	timestr = time.strftime("%Y%m%d-%H%M%S-")
+	output_dir = args.out_dir_path + '/' + time.strftime("%m%d")
 	mkdir(output_dir)
-	timestr = setLogger(out_dir=output_dir)
+	timestr = setLogger(timestr, out_dir=output_dir)
 	
 	# process train and test data
 	_, train_title, train_content, train_tag = get_pdTable(args.train_path)

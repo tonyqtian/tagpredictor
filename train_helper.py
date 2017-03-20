@@ -41,7 +41,7 @@ parser.add_argument("--eval-on-epoch", dest="eval_on_epoch", action='store_true'
 parser.add_argument("--show-eval-pred", dest="show_evl_pred", type=int, metavar='<int>', default=0, help="Show <num> predicts after every test pred")
 args = parser.parse_args()
 
-from processing import train
+from src.processing import train
 train(args)
 
 print('\a')
