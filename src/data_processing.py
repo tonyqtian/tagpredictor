@@ -64,12 +64,9 @@ def createVocab(tableList, min_count=1):
 	contentList = []
 	for list1 in tableList:
 		contentList.extend(list1)
-	maxLen = 0
 	wdFrq = {}
 	total_words = 0
 	for line in contentList:
-		if len(line) > maxLen:
-			maxLen = len(line)
 		for wd in line:
 			try:
 				wdFrq[wd] += 1
@@ -83,8 +80,8 @@ def createVocab(tableList, min_count=1):
 	for _, freq in sorted_word_freqs:
 		if freq > min_count:
 			vocab_size += 1
-	vocabDict = {'':0,}
-	vocabReverseDict = ['',]
+	vocabDict = {'<pad>':0, '<unk>':1}
+	vocabReverseDict = ['<pad>', '<unk>']
 	vocabLen = len(vocabDict)
 	index = vocabLen	
 	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:
@@ -93,9 +90,9 @@ def createVocab(tableList, min_count=1):
 		vocabReverseDict.append(word)
 		
 	logger.info('  vocab size %i ' % len(vocabReverseDict))
-	return vocabDict, vocabReverseDict, maxLen
+	return vocabDict, vocabReverseDict
 
-def word2num(contentTable, vocab, maxLen, postpad=False):
+def word2num(contentTable, vocab, unk, maxLen, postpad=False):
 	unk_hit = 0
 	totalword = 0
 	data = []
@@ -105,7 +102,7 @@ def word2num(contentTable, vocab, maxLen, postpad=False):
 			if word in vocab:
 				w2num.append(vocab[word])
 			else:
-				w2num.append(vocab[''])
+				w2num.append(vocab[unk])
 				unk_hit += 1
 			totalword += 1
 		data.append(w2num)

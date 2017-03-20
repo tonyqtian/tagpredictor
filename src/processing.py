@@ -29,24 +29,30 @@ def train(args):
 	test_body, test_maxLen = tokenizeIt(test_body, clean=True)
 	train_tag, _ = tokenizeIt(train_tag)
 	test_tag, _ = tokenizeIt(test_tag)
-	maxInputLength = max(train_maxLen, test_maxLen)
-# 	outputLength = 5
+	inputLength = max(train_maxLen, test_maxLen)
+	outputLength = 5
 	
-	embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-	pred_vocabDict, pred_vocabReverseDict, outputLength = createVocab([train_tag,], min_count=0)
+	if args.w2v:
+		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
+		unk = ''
+	else:
+		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=1)
+		embdw2v = None
+		unk = '<unk>'
+	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=0)
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
 	
 	# word to padded numerical np array
-	train_x = word2num(train_body, vocabDict, maxInputLength)
-	test_x = word2num(test_body, vocabDict, maxInputLength)
-	train_y = word2num(train_tag, pred_vocabDict, outputLength, postpad=True)
+	train_x = word2num(train_body, vocabDict, unk, inputLength)
+	test_x = word2num(test_body, vocabDict, unk, inputLength)
+	train_y = word2num(train_tag, pred_vocabDict, '<unk>', outputLength, postpad=True)
 	train_y = to_categorical2D(train_y, len(pred_vocabDict))
-	test_y = word2num(test_tag, pred_vocabDict, outputLength, postpad=True)
+	test_y = word2num(test_tag, pred_vocabDict, '<unk>', outputLength, postpad=True)
 	test_y = to_categorical2D(test_y, len(pred_vocabDict))
 	
 	# create model 
-	rnnmodel = getModel(maxInputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
+	rnnmodel = getModel(inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
 	rnnmodel.compile(loss='categorical_crossentropy', optimizer=args.optimizer, metrics=['categorical_accuracy'])
 	rnnmodel.summary()
 	

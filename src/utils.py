@@ -12,6 +12,7 @@ import re
 def setLogger(timestr, onscreen=True, out_dir=None):
 	logger = logging.getLogger()
 	logger.setLevel(logging.DEBUG)
+	logging.getLogger("tensorflow").setLevel(logging.WARNING)
 	if onscreen:
 		console_format = BColors.OKBLUE + '[%(levelname)s]' + BColors.ENDC + ' (%(name)s) %(message)s'
 		#datefmt='%Y-%m-%d %Hh-%Mm-%Ss'
