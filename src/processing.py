@@ -53,12 +53,7 @@ def train(args):
 	train_x = word2num(train_body, vocabDict, unk, inputLength, eof=eof)
 	test_x = word2num(test_body, vocabDict, unk, inputLength, eof=eof)
 	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength, postpad=True, eof=eof)
-# 	print(train_y)
 	train_y = to_categorical2D(train_y, len(pred_vocabDict)+1)
-# 	print(train_y)
-# 	from numpy import argmax
-# 	print(argmax(train_y, axis=-1))
-# 	raise RuntimeError
 	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength, postpad=True, eof=eof)
 	test_y = to_categorical2D(test_y, len(pred_vocabDict)+1)
 	
