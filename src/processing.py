@@ -33,39 +33,48 @@ def train(args):
 	train_tag, _ = tokenizeIt(train_tag)
 	test_tag, _ = tokenizeIt(test_tag)
 # 	inputLength = max(train_maxLen, test_maxLen)
-	inputLength = 450
-	outputLength = 5
+	inputLength = 400
+	outputLength = 5 + 1
 	
 	if args.w2v:
 		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
 		unk = ''
+		eof = None
 	else:
 		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=1)
 		embdw2v = None
 		unk = '<unk>'
+		eof = '<EOF>'
 	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=0)
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
 	
 	# word to padded numerical np array
-	train_x = word2num(train_body, vocabDict, unk, inputLength)
-	test_x = word2num(test_body, vocabDict, unk, inputLength)
-	train_y = word2num(train_tag, pred_vocabDict, '<unk>', outputLength, postpad=True)
-	train_y = to_categorical2D(train_y, len(pred_vocabDict))
-	test_y = word2num(test_tag, pred_vocabDict, '<unk>', outputLength, postpad=True)
-	test_y = to_categorical2D(test_y, len(pred_vocabDict))
+	train_x = word2num(train_body, vocabDict, unk, inputLength, eof=eof)
+	test_x = word2num(test_body, vocabDict, unk, inputLength, eof=eof)
+	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength, postpad=True, eof=eof)
+# 	print(train_y)
+	train_y = to_categorical2D(train_y, len(pred_vocabDict)+1)
+# 	print(train_y)
+# 	from numpy import argmax
+# 	print(argmax(train_y, axis=-1))
+# 	raise RuntimeError
+	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength, postpad=True, eof=eof)
+	test_y = to_categorical2D(test_y, len(pred_vocabDict)+1)
 	
 	# create model 
-	rnnmodel = getModel(inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
+	rnnmodel = getModel(inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
 	from keras.optimizers import RMSprop
 	optimizer = RMSprop(lr=args.learning_rate)
-	rnnmodel.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
+	myLoss = 'categorical_crossentropy'
+	myMetrics = 'fmeasure'
+	rnnmodel.compile(loss=myLoss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
 	
 	# train and test model
 	myCallbacks = []
 	if args.eval_on_epoch:
-		evl = Evaluator(args, output_dir, timestr, 'categorical_accuracy', test_x, test_y, vocabReverseDict, pred_vocabReverseDict)
+		evl = Evaluator(args, output_dir, timestr, myMetrics, test_x, test_y, vocabReverseDict, pred_vocabReverseDict)
 		myCallbacks.append(evl)
 	if args.earlystop:
 		earlystop = EarlyStopping(patience = args.earlystop, verbose=1, mode='auto')
@@ -73,3 +82,6 @@ def train(args):
 	rnnmodel.fit(train_x, train_y, validation_split=args.valid_split, batch_size=args.train_batch_size, nb_epoch=args.epochs, callbacks=myCallbacks)
 	if not args.eval_on_epoch:
 		rnnmodel.evaluate(test_x, test_y, batch_size=args.eval_batch_size)
+	
+	# test output (remove duplicate, remove <pad> <unk>, comparable layout, into csv)
+	# final inference: output(remove duplicate, remove <pad> <unk>, limit output words to 3 or 2 or 1..., into csv)

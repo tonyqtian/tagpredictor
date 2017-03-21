@@ -80,8 +80,8 @@ def createVocab(tableList, min_count=1):
 	for _, freq in sorted_word_freqs:
 		if freq > min_count:
 			vocab_size += 1
-	vocabDict = {'<pad>':0, '<unk>':1}
-	vocabReverseDict = ['<pad>', '<unk>']
+	vocabDict = {'<pad>':0, '<PAD>':1, '<EOF>':2, '<unk>':3}
+	vocabReverseDict = ['<pad>', '<PAD>', '<EOF>', '<unk>']
 	vocabLen = len(vocabDict)
 	index = vocabLen	
 	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:
@@ -92,7 +92,7 @@ def createVocab(tableList, min_count=1):
 	logger.info('  vocab size %i ' % len(vocabReverseDict))
 	return vocabDict, vocabReverseDict
 
-def word2num(contentTable, vocab, unk, maxLen, postpad=False):
+def word2num(contentTable, vocab, unk, maxLen, postpad=False, eof=None):
 	unk_hit = 0
 	totalword = 0
 	data = []
@@ -105,6 +105,8 @@ def word2num(contentTable, vocab, unk, maxLen, postpad=False):
 				w2num.append(vocab[unk])
 				unk_hit += 1
 			totalword += 1
+		if not type(eof) is type(None):
+			w2num.append(vocab[eof])
 		data.append(w2num)
 	# pad to np array	
 	if postpad:
@@ -116,4 +118,4 @@ def word2num(contentTable, vocab, unk, maxLen, postpad=False):
 def to_categorical2D(y, nb_classes=None):
 	if not nb_classes:
 		nb_classes = y.max()
-	return (np.arange(nb_classes) == y[:,:,None]-1).astype(int)
+	return (np.arange(nb_classes) == y[:,:,None]).astype(int)

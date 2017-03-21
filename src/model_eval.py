@@ -39,8 +39,8 @@ class Evaluator(Callback):
 		self.test_accs.append(self.test_metric)
 		if self.evl_pred:
 			pred = model.predict(self.test_x[:self.evl_pred], batch_size=self.evl_pred)
-			pred = argmax(pred, axis=2)
-			reals = argmax(self.test_y[:self.evl_pred], axis=2)
+			pred = argmax(pred, axis=-1)
+			reals = argmax(self.test_y[:self.evl_pred], axis=-1)
 			self.print_pred(self.test_x[:self.evl_pred], pred, reals)
 
 	def on_epoch_end(self, epoch, logs={}):

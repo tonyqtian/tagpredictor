@@ -12,17 +12,21 @@ from keras.layers.wrappers import Bidirectional, TimeDistributed
 from keras.layers.core import Dense, RepeatVector
 from gensim.models.word2vec import Word2Vec
 # import keras.backend as K
+# from seq2seq.models import AttentionSeq2Seq
+from attention_wrapper import Attention
+# from attention_lstm import AttentionLSTMWrapper
 
 logger = logging.getLogger(__name__)
 
 def getModel(input_length, output_length, vocab_size, pred_size, embd, embd_dim, embd_trainable=True, rnn_opt='cpu', rnn_dim=32):
 		
-	# encoder
+
 	sequence = Input(shape=(input_length,), dtype='int32')
 	if type(embd) is type(None):
 		x = Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable)(sequence)
 	else:
 		x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
+	# encoder
 # 	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
 # 	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
 	x = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(x)
@@ -31,9 +35,16 @@ def getModel(input_length, output_length, vocab_size, pred_size, embd, embd_dim,
 	
 	# decoder
 	pred = RepeatVector(output_length)(x)
+# 	pred = x
+# 	myRNN = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)
+# 	myOutputShape = Input(shape=(output_length,pred_size), dtype='float32')
+# 	myRNN = AttentionLSTMWrapper(myRNN, myOutputShape)
+# 	pred = myRNN(pred)
+# 	pred = Attention(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(pred)
 	pred = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(pred)
 	pred = TimeDistributed(Dense(pred_size, activation='softmax'))(pred)
-	
+# 	pred = AttentionSeq2Seq(input_dim=embd_dim, input_length=input_length, hidden_dim=rnn_dim, output_length=output_length, output_dim=pred_size, depth=2, bidirectional=False)(x)
+		
 	model = Model(input=sequence, output=pred)
 	return model
 
