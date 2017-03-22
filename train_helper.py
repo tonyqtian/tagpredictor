@@ -17,7 +17,7 @@ parser.add_argument("--test-path", dest="test_path", type=str, metavar='<str>', 
 parser.add_argument("--out-dir", dest="out_dir_path", type=str, metavar='<str>', default='output', help="The path to the output directory")
 parser.add_argument("--model-type", dest="model_type", type=str, metavar='<str>', default='cls', help="Model type (cls|reg) (default=cls)")
 parser.add_argument("--optimizer", dest="optimizer", type=str, metavar='<str>', default='rmsprop', help="Optimization algorithm (rmsprop|sgd|adagrad|adadelta|adam|adamax) (default=rmsprop)")
-parser.add_argument("--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp|hng) (default=mse) set to cnp if cls model")
+parser.add_argument("--loss", dest="loss", type=str, metavar='<str>', default='mse', help="Loss function (mse|mae|cnp|hng) (default=mse)")
 parser.add_argument("--embedding-dim", dest="embd_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
 parser.add_argument("--cnn-kernel", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 parser.add_argument("--cnn-win", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
@@ -41,6 +41,8 @@ parser.add_argument("--eval-on-epoch", dest="eval_on_epoch", action='store_true'
 parser.add_argument("--show-eval-pred", dest="show_evl_pred", type=int, metavar='<int>', default=0, help="Show <num> predicts after every test pred")
 parser.add_argument("--w2v-embedding", dest="w2v", action='store_true', help="Use pre-trained word2vec embedding")
 parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar='<float>', default=0.01, help="Optimizer learning rate")
+parser.add_argument("--seq2seq", dest="seq2seq", action='store_true', help="Use Seq2Seq Model")
+parser.add_argument("--attention", dest="attention", action='store_true', help="Use Attention Wrapper")
 args = parser.parse_args()
 
 from src.processing import train

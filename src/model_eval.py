@@ -7,7 +7,7 @@ import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
 from numpy import argmax
-from eval_metrics import f1_score_prec_rec
+from src.eval_metrics import f1_score_prec_rec
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +86,7 @@ class Evaluator(Callback):
 					infr_line.append(self.reVocab[strin])
 			pred_line = [self.pred_reVocab[strin] for strin in pred]
 			real_line = [self.pred_reVocab[strin] for strin in real]
+			logger.info('[Test]  ')
 			logger.info('[Test]  Line: %s ' % ' '.join(infr_line) )
 			logger.info('[Test]  Pred: %s ' % ' '.join(pred_line) )
 			logger.info('[Test]  True: %s ' % ' '.join(real_line) )

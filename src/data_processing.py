@@ -80,8 +80,8 @@ def createVocab(tableList, min_count=1):
 	for _, freq in sorted_word_freqs:
 		if freq > min_count:
 			vocab_size += 1
-	vocabDict = {'<pad>':0, '<PAD>':1, '<EOF>':2, '<unk>':3}
-	vocabReverseDict = ['<pad>', '<PAD>', '<EOF>', '<unk>']
+	vocabDict = {'<pad>':0, '<EOF>':1, '<unk>':2}
+	vocabReverseDict = ['<pad>', '<EOF>', '<unk>']
 	vocabLen = len(vocabDict)
 	index = vocabLen	
 	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:

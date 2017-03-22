@@ -19,10 +19,12 @@ def precision(y_true, y_pred, argm=False):
 	predicted_positive = 0
 	for (y_true_line, y_pred_line) in zip(y_true, y_pred):
 		tmpIntersec = np.intersect1d(y_true_line, y_pred_line)
+		lenIntersec = len(tmpIntersec)
 		if 0 in tmpIntersec:
-			true_positive += len(tmpIntersec) - 1
-		else:
-			true_positive += len(tmpIntersec)
+			lenIntersec -= 1
+		if 1 in tmpIntersec:
+			lenIntersec -= 1
+		true_positive += lenIntersec
 		predicted_positive += np.sum(np.around(np.clip(np.unique(y_pred_line), 0, 1)))
 	precision = true_positive / (predicted_positive + np.finfo(float).eps)
 	return precision
@@ -78,12 +80,12 @@ def f1_score_prec_rec(y_true, y_pred, beta=1, argm=False):
 	epsilon = np.finfo(float).eps
 	for (y_true_line, y_pred_line) in zip(y_true, y_pred):
 		y_pred_line = np.unique(y_pred_line)
+		y_pred_line = np.delete(y_pred_line, np.argwhere(y_pred_line==0))
+		y_pred_line = np.delete(y_pred_line, np.argwhere(y_pred_line==1))
 		y_true_line = np.unique(y_true_line)
-		tmpIntersec = np.intersect1d(y_true_line, y_pred_line, assume_unique=True)
-		if 0 in tmpIntersec:
-			true_positive += len(tmpIntersec) - 1
-		else:
-			true_positive += len(tmpIntersec)
+		y_true_line = np.delete(y_true_line, np.argwhere(y_true_line==0))
+		y_true_line = np.delete(y_true_line, np.argwhere(y_true_line==1))
+		true_positive += len(np.intersect1d(y_true_line, y_pred_line, assume_unique=True))
 		predicted_positive += np.sum(np.around(np.clip(y_pred_line, 0, 1)))
 		possible_positive += np.sum(np.around(np.clip(y_true_line, 0, 1)))
 	precision = true_positive / (predicted_positive + epsilon)

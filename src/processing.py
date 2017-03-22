@@ -58,10 +58,10 @@ def train(args):
 	test_y = to_categorical2D(test_y, len(pred_vocabDict)+1)
 	
 	# create model 
-	rnnmodel = getModel(inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v, embd_dim=args.embd_dim, rnn_opt=args.rnn_opt)
+	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v)
 	from keras.optimizers import RMSprop
 	optimizer = RMSprop(lr=args.learning_rate)
-	myLoss = 'categorical_crossentropy'
+	myLoss = args.loss
 	myMetrics = 'fmeasure'
 	rnnmodel.compile(loss=myLoss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()

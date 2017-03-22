@@ -4,45 +4,51 @@ Created on Mar 18, 2017
 @author: tonyq
 '''
 import logging
-from keras.models import Model, Sequential
-from keras.engine.topology import Input
+from keras.models import Sequential
 from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM
 from keras.layers.wrappers import Bidirectional, TimeDistributed
 from keras.layers.core import Dense, RepeatVector, Activation, Dropout
 from gensim.models.word2vec import Word2Vec
-# from attention_wrapper import Attention
+from src.attention_wrapper import Attention
+from seq2seq import Seq2Seq
 
 logger = logging.getLogger(__name__)
 
-def getModel(input_length, output_length, vocab_size, pred_size, embd, embd_dim, embd_trainable=True, rnn_opt='cpu', rnn_dim=32):
-		
-	sequence = Input(shape=(input_length,), dtype='int32')
-	if type(embd) is type(None):
-		x = Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable)(sequence)
-	else:
-		x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
-	
-# 	model = Sequential()
+def getModel(args, input_length, output_length, vocab_size, pred_size, embd, embd_trainable=True):
+	embd_dim = args.embd_dim
+	rnn_opt = args.rnn_opt
+	rnn_dim = args.rnn_dim	
+# 	sequence = Input(shape=(input_length,), dtype='int32')
 # 	if type(embd) is type(None):
-# 		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, trainable=embd_trainable, batch_input_shape=(None, input_length)))
+# 		x = Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable)(sequence)
 # 	else:
-# 		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
-
-	# encoder
-# 	x = Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))(x)
-# 	x = Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))(x)
-	x = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(x)
-	x = LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)(x)
-	x = Activation('relu')(x)
-# 	x = Dense(rnn_dim, activation='relu')(x)
+# 		x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
 	
-	# decoder
-	pred = RepeatVector(output_length)(x)
-	pred = LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)(pred)
-	pred = TimeDistributed(Dense(pred_size, activation='softmax'))(pred)
-# 	model.add(Activation('softmax'))
-	model = Model(input=sequence, output=pred)
+	model = Sequential()
+	if type(embd) is type(None):
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, trainable=embd_trainable, batch_input_shape=(None, input_length)))
+	else:
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
+	
+	if args.seq2seq:
+		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), peek=True, depth=2))
+	else:
+		# encoder
+		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
+		if args.attention:
+			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
+		else:
+			model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))
+		model.add(Activation('relu'))
+		# decoder
+		if args.attention:
+			model.add(Attention(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)))
+		else:
+			model.add(RepeatVector(output_length))
+			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
+		model.add(TimeDistributed(Dense(pred_size)))
+		model.add(Activation('softmax'))
 	return model
 
 def makeEmbedding(args, inputTable):
