@@ -26,30 +26,20 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 # 		x = Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable)(sequence)
 	
 	model = Sequential()
-	if args.attention:
-		if type(embd) is type(None):
-			model.add(Embedding(vocab_size, embd_dim, mask_zero=False, trainable=embd_trainable, batch_input_shape=(None, input_length)))
-		else:
-			model.add(Embedding(vocab_size, embd_dim, mask_zero=False, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
+	if type(embd) is type(None):
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable, batch_input_shape=(None, input_length)))
 	else:
-		if type(embd) is type(None):
-			model.add(Embedding(vocab_size, embd_dim, mask_zero=False, trainable=embd_trainable))
-		else:
-			model.add(Embedding(vocab_size, embd_dim, mask_zero=False, weights=[embd], trainable=embd_trainable))
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
 	
 	if args.seq2seq:
 		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), peek=True, depth=2))
 	else:
-		# encoder
 		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
-		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
-		# decoder
 		if args.attention:
+			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
 			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)))
 		else:
-# 			model.add(RepeatVector(output_length))
 			model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))
-# 		model.add(TimeDistributed(Dense(pred_size)))
 		model.add(Dense(pred_size))
 	model.add(Activation(args.activation))
 	return model

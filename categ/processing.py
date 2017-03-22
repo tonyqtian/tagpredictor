@@ -48,13 +48,9 @@ def train(args):
 	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=1)
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
-	if args.attention:
-		mypad = 'pre'
-	else:
-		mypad = None
 	# word to padded numerical np array
-	train_x = word2num(train_body, vocabDict, unk, inputLength, padding=mypad)
-	test_x = word2num(test_body, vocabDict, unk, inputLength, padding=mypad)
+	train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre')
+	test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre')
 	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength)
 	train_y = to_categoricalAll(train_y, len(pred_vocabDict))
 	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength)

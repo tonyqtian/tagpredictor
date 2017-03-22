@@ -126,3 +126,10 @@ def to_categoricalAll(y, nb_classes):
 			categorical[line_idx][elem] = 1
 		line_idx += 1
 	return categorical
+
+def categorical_toary(y):
+	(length, nb_classes) = y.shape
+	y_ary = []
+	for i in range(length):
+		y_ary.append(np.argwhere(y[i,:] == 1).ravel())
+	return y_ary
