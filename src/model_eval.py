@@ -7,6 +7,7 @@ import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
 from numpy import argmax
+from eval_metrics import f1_score_prec_rec
 
 logger = logging.getLogger(__name__)
 
@@ -28,20 +29,28 @@ class Evaluator(Callback):
 		self.val_losses = []
 		self.test_losses = []
 		self.test_accs = []
+		self.test_precisions = []
+		self.test_recalls = []
+		self.test_f1s = []
 		self.plot = args.plot
 		self.evl_pred = args.show_evl_pred
 		self.reVocab = reVocab
 		self.pred_reVocab = pred_reVocab
 		
 	def eval(self, model, epoch, print_info=False):
-		self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size)
-		self.test_losses.append(self.test_loss)
-		self.test_accs.append(self.test_metric)
+# 		self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size)
+# 		self.test_losses.append(self.test_loss)
+# 		self.test_accs.append(self.test_metric)
 		if self.evl_pred:
-			pred = model.predict(self.test_x[:self.evl_pred], batch_size=self.evl_pred)
-			pred = argmax(pred, axis=-1)
-			reals = argmax(self.test_y[:self.evl_pred], axis=-1)
-			self.print_pred(self.test_x[:self.evl_pred], pred, reals)
+			pred = model.predict(self.test_x, batch_size=self.batch_size)
+			preds = argmax(pred, axis=-1)
+			reals = argmax(self.test_y, axis=-1)
+			precision, recall, f1_score = f1_score_prec_rec(reals, preds)
+			self.test_f1s.append(f1_score)
+			self.test_recalls.append(recall)
+			self.test_precisions.append(precision)
+			self.print_pred(self.test_x[:self.evl_pred], preds[:self.evl_pred], reals[:self.evl_pred])
+			self.print_info(epoch, precision, recall, f1_score)
 
 	def on_epoch_end(self, epoch, logs={}):
 		self.losses.append(logs.get('loss'))
@@ -51,7 +60,6 @@ class Evaluator(Callback):
 		self.eval(self.model, epoch, print_info=True)
 		if self.plot:
 			self.plothem()
-		self.print_info(epoch)
 		return
 
 	def plothem(self):
@@ -60,8 +68,11 @@ class Evaluator(Callback):
 		plt.plot(training_epochs, self.accs, 'r.', label='Train Metric')
 		plt.plot(training_epochs, self.val_losses, 'g', label='Valid Loss')
 		plt.plot(training_epochs, self.val_accs, 'y.', label='Valid Metric')
-		plt.plot(training_epochs, self.test_losses, 'k', label='Test Loss')
-		plt.plot(training_epochs, self.test_accs, 'c.', label='Test Metric')
+# 		plt.plot(training_epochs, self.test_losses, 'k', label='Test Loss')
+# 		plt.plot(training_epochs, self.test_accs, 'c.', label='Test Metric')
+		plt.plot(training_epochs, self.test_f1s, 'k', label='Test F1-Score')
+		plt.plot(training_epochs, self.test_precisions, 'c.', label='Test Precision')
+		plt.plot(training_epochs, self.test_recalls, 'm.', label='Test Recall')
 		plt.legend()
 		plt.xlabel('epochs')
 		plt.savefig(self.out_dir + '/' + self.timestr + 'LossAccuracy.png')
@@ -79,6 +90,6 @@ class Evaluator(Callback):
 			logger.info('[Test]  Pred: %s ' % ' '.join(pred_line) )
 			logger.info('[Test]  True: %s ' % ' '.join(real_line) )
 				
-	def print_info(self, epoch):
+	def print_info(self, epoch, precision, recall, f1score):
 		logger.info('[Test]  Epoch: %i' % epoch)
-		logger.info('[Test]  loss: %.4f, metric: %.4f' % (self.test_loss, self.test_metric))
+		logger.info('[Test]  F1-Score: %.4f, Precision: %.4f, Recall: %.4f' % (f1score, precision, recall))
