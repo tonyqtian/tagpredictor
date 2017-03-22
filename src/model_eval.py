@@ -88,9 +88,9 @@ class Evaluator(Callback):
 			real_line = [self.pred_reVocab[strin] for strin in real]
 			logger.info('[Test]  ')
 			logger.info('[Test]  Line: %s ' % ' '.join(infr_line) )
-			logger.info('[Test]  Pred: %s ' % ' '.join(pred_line) )
 			logger.info('[Test]  True: %s ' % ' '.join(real_line) )
-				
+			logger.info('[Test]  Pred: %s ' % ' '.join(pred_line) )
+							
 	def print_info(self, epoch, precision, recall, f1score):
 		logger.info('[Test]  Epoch: %i' % epoch)
 		logger.info('[Test]  F1-Score: %.4f, Precision: %.4f, Recall: %.4f' % (f1score, precision, recall))

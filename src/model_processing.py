@@ -48,8 +48,7 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 			model.add(RepeatVector(output_length))
 			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
 		model.add(TimeDistributed(Dense(pred_size)))
-	if args.loss == 'categorical_crossentropy':
-		model.add(Activation('softmax'))
+	model.add(Activation(args.activation))
 	return model
 
 def makeEmbedding(args, inputTable):
