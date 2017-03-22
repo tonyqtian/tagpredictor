@@ -42,7 +42,6 @@ def train(args):
 		unk = None
 	else:
 		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2)
-		print(vocabReverseDict)
 		embdw2v = None
 		unk = '<unk>'
 	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=1)

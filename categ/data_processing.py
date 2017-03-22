@@ -35,6 +35,7 @@ def stripTagsAndUris(x):
 def get_words(text):
 # 	word_split = re.compile('[^a-zA-Z0-9_\\+\\-]')
 # 	return [word.strip().lower() for word in word_split.split(text)]
+	text = text.replace("\\", " ")
 	return word_tokenize(text)
 	
 def get_pdTable(path):
