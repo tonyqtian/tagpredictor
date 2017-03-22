@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import logging
 from keras.preprocessing.sequence import pad_sequences
 from tqdm._tqdm import tqdm
+from nltk.tokenize import word_tokenize
 from numpy import array
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,9 @@ def stripTagsAndUris(x):
 		return ""
 	
 def get_words(text):
-	word_split = re.compile('[^a-zA-Z0-9_\\+\\-]')
-	return [word.strip().lower() for word in word_split.split(text)]
+# 	word_split = re.compile('[^a-zA-Z0-9_\\+\\-]')
+# 	return [word.strip().lower() for word in word_split.split(text)]
+	return word_tokenize(text)
 	
 def get_pdTable(path):
 	logger.info(' Processing pandas csv ')
@@ -81,8 +83,8 @@ def createVocab(tableList, min_count=1):
 	for _, freq in sorted_word_freqs:
 		if freq >= min_count:
 			vocab_size += 1
-	vocabDict = {'<pad>':0, '<EOF>':1, '<unk>':2}
-	vocabReverseDict = ['<pad>', '<EOF>', '<unk>']
+	vocabDict = {'<unk>':0}
+	vocabReverseDict = ['<unk>']
 	vocabLen = len(vocabDict)
 	index = vocabLen	
 	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:
@@ -116,7 +118,12 @@ def word2num(contentTable, vocab, unk, maxLen, padding=None, eof=None):
 		np_ary = array(data)
 	return np_ary
 
-def to_categorical2D(y, nb_classes=None):
+def to_categoricalAll(y, nb_classes=None):
 	if not nb_classes:
 		nb_classes = y.max()
-	return (np.arange(nb_classes) == y[:,:,None]).astype(int)
+	print(y)
+	tmp = (np.arange(nb_classes) == y[:,:,None]).astype(int)
+	print(tmp)
+	tmp2 = np.sum(tmp, axis=-2)
+	print(tmp2)
+	return np.clip(tmp2, 0, 1)
