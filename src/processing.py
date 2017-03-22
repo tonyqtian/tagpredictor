@@ -61,9 +61,8 @@ def train(args):
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v)
 	from keras.optimizers import RMSprop
 	optimizer = RMSprop(lr=args.learning_rate)
-	myLoss = args.loss
 	myMetrics = 'fmeasure'
-	rnnmodel.compile(loss=myLoss, optimizer=optimizer, metrics=[myMetrics])
+	rnnmodel.compile(loss=args.loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
 	
 	# train and test model
