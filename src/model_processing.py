@@ -40,10 +40,10 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
 		else:
 			model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))
-		model.add(Activation('relu'))
+# 		model.add(Activation('relu'))
 		# decoder
 		if args.attention:
-			model.add(Attention(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt)))
+			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)))
 		else:
 			model.add(RepeatVector(output_length))
 			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))

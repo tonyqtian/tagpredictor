@@ -4,6 +4,7 @@ Created on Mar 17, 2017
 @author: tonyq
 '''
 import matplotlib
+from keras.backend.tensorflow_backend import categorical_crossentropy
 matplotlib.use('Agg')
 
 import logging, time
@@ -34,7 +35,7 @@ def train(args):
 	test_tag, _ = tokenizeIt(test_tag)
 # 	inputLength = max(train_maxLen, test_maxLen)
 	inputLength = 400
-	outputLength = 5 + 1
+	outputLength = 1
 	
 	if args.w2v:
 		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
@@ -47,19 +48,19 @@ def train(args):
 	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=1)
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
-	
+	if args.attention:
+		mypad = 'pre'
+	else:
+		mypad = None
 	# word to padded numerical np array
-	train_x = word2num(train_body, vocabDict, unk, inputLength)
-	test_x = word2num(test_body, vocabDict, unk, inputLength)
+	train_x = word2num(train_body, vocabDict, unk, inputLength, padding=mypad)
+	test_x = word2num(test_body, vocabDict, unk, inputLength, padding=mypad)
 	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength)
-	train_y = to_categorical(train_y, len(pred_vocabDict))
 	train_y = to_categoricalAll(train_y, len(pred_vocabDict))
 	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength)
 	test_y = to_categoricalAll(test_y, len(pred_vocabDict))
-	raise RuntimeError
-	
 	# create model 
-	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v)
+	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 	from keras.optimizers import RMSprop
 	optimizer = RMSprop(lr=args.learning_rate)
 	myMetrics = 'fmeasure'

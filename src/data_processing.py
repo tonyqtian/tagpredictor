@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 import logging
 from keras.preprocessing.sequence import pad_sequences
 from tqdm._tqdm import tqdm
+from nltk.tokenize import word_tokenize
 from numpy import array
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,9 @@ def stripTagsAndUris(x):
 		return ""
 	
 def get_words(text):
-	word_split = re.compile('[^a-zA-Z0-9_\\+\\-]')
-	return [word.strip().lower() for word in word_split.split(text)]
+# 	word_split = re.compile('[^a-zA-Z0-9_\\+\\-]')
+# 	return [word.strip().lower() for word in word_split.split(text)]
+	return word_tokenize(text)
 	
 def get_pdTable(path):
 	logger.info(' Processing pandas csv ')

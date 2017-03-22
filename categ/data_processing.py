@@ -12,7 +12,7 @@ import logging
 from keras.preprocessing.sequence import pad_sequences
 from tqdm._tqdm import tqdm
 from nltk.tokenize import word_tokenize
-from numpy import array
+from numpy import array, zeros
 
 logger = logging.getLogger(__name__)
 
@@ -118,12 +118,11 @@ def word2num(contentTable, vocab, unk, maxLen, padding=None, eof=None):
 		np_ary = array(data)
 	return np_ary
 
-def to_categoricalAll(y, nb_classes=None):
-	if not nb_classes:
-		nb_classes = y.max()
-	print(y)
-	tmp = (np.arange(nb_classes) == y[:,:,None]).astype(int)
-	print(tmp)
-	tmp2 = np.sum(tmp, axis=-2)
-	print(tmp2)
-	return np.clip(tmp2, 0, 1)
+def to_categoricalAll(y, nb_classes):
+	categorical = zeros((len(y),nb_classes))
+	line_idx = 0
+	for line in y:
+		for elem in line:
+			categorical[line_idx][elem] = 1
+		line_idx += 1
+	return categorical
