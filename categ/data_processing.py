@@ -132,5 +132,5 @@ def categorical_toary(y):
 	(length, nb_classes) = y.shape
 	y_ary = []
 	for i in range(length):
-		y_ary.append(np.argwhere(y[i,:] == 1).ravel())
+		y_ary.append(np.argwhere(y[i,:] == 1).ravel().tolist())
 	return y_ary

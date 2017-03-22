@@ -10,7 +10,8 @@ matplotlib.use('Agg')
 import logging, time
 from keras.callbacks import EarlyStopping
 from src.utils import setLogger, mkdir
-from categ.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll
+from categ.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll,\
+	categorical_toary
 from categ.model_processing import getModel, makeEmbedding
 from categ.model_eval import Evaluator
 

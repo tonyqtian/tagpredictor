@@ -40,7 +40,8 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)))
 		else:
 			model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))
-		model.add(Dense(pred_size))
+# 		model.add(Dense(pred_size))
+		model.add(DenseWithMasking(pred_size))
 	model.add(Activation(args.activation))
 	return model
 
@@ -77,3 +78,11 @@ def makeEmbedding(args, inputTable):
 # 	w2vModel.accuracy('../data/questions-words.txt')
 	del w2vModel
 	return embdWeights, vocabDict, vocabReverseDict
+
+class DenseWithMasking(Dense):
+	def __init__(self, output_dim, **kwargs):
+		self.supports_masking = True
+		super(DenseWithMasking, self).__init__(output_dim, **kwargs)
+	
+	def compute_mask(self, x, mask=None):
+		return None

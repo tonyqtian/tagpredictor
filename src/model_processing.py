@@ -27,9 +27,9 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 	
 	model = Sequential()
 	if type(embd) is type(None):
-		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, trainable=embd_trainable, batch_input_shape=(None, input_length)))
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, trainable=embd_trainable, batch_input_shape=(None, input_length)))
 	else:
-		model.add(Embedding(vocab_size, embd_dim, mask_zero=False, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
+		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
 	
 	if args.seq2seq:
 		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), peek=True, depth=2))
