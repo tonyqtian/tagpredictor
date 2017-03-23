@@ -13,8 +13,7 @@ from keras.callbacks import EarlyStopping
 from util.utils import setLogger, mkdir
 from util.model_eval import Evaluator
 from util.w2v_embedding import makeEmbedding
-from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll
-from categ.model_processing import getModel
+from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D, to_categoricalAll
 
 logger = logging.getLogger(__name__)
 
@@ -37,29 +36,60 @@ def train(args):
 	test_tag, _ = tokenizeIt(test_tag)
 # 	inputLength = max(train_maxLen, test_maxLen)
 	inputLength = 400
-	outputLength = 1
-	
-	if args.w2v:
-		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-		unk = None
-	else:
-		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<unk>'])
-		embdw2v = None
-		unk = '<unk>'
-	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=[])
-	pred_unk = None
-	# logger.info(vocabDict)
-	logger.info(pred_vocabReverseDict)
-	
-	# word to padded numerical np array
-	train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre')
-	test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre')
-	train_y = word2num(train_tag, pred_vocabDict, pred_unk, outputLength)
-	train_y = to_categoricalAll(train_y, len(pred_vocabDict))
-	test_y = word2num(test_tag, pred_vocabDict, pred_unk, outputLength)
-	test_y = to_categoricalAll(test_y, len(pred_vocabDict))
+	if args.model == 'seq2seq':
+		
+		outputLength = 5 + 1	
+		use_argm = True
+		if args.w2v:
+			embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
+			unk = None
+			eof = None
+		else:
+			vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
+			embdw2v = None
+			unk = '<unk>'
+			eof = '<EOF>'
+		pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
+		# logger.info(vocabDict)
+		logger.info(pred_vocabReverseDict)		
+		# word to padded numerical np array
+		train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre',eof=eof)
+		test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre', eof=eof)
+		train_y = word2num(train_tag, pred_vocabDict, unk, outputLength, padding='post', eof=eof)
+		train_y = to_categorical2D(train_y, len(pred_vocabDict))
+		test_y = word2num(test_tag, pred_vocabDict, unk, outputLength, padding='post', eof=eof)
+		test_y = to_categorical2D(test_y, len(pred_vocabDict))
 
-	# create model 
+		# choose model 
+		from src.seq2seq_model import getModel
+
+	elif args.model == 'categ':
+		outputLength = 1
+		use_argm = False
+		
+		if args.w2v:
+			embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
+			unk = None
+		else:
+			vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<unk>'])
+			embdw2v = None
+			unk = '<unk>'
+		pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=[])
+		pred_unk = None
+		# logger.info(vocabDict)
+		logger.info(pred_vocabReverseDict)
+		
+		# word to padded numerical np array
+		train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre')
+		test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre')
+		train_y = word2num(train_tag, pred_vocabDict, pred_unk, outputLength)
+		train_y = to_categoricalAll(train_y, len(pred_vocabDict))
+		test_y = word2num(test_tag, pred_vocabDict, pred_unk, outputLength)
+		test_y = to_categoricalAll(test_y, len(pred_vocabDict))
+		
+		# choose model 
+		from src.categ_model import getModel
+		
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 
 	if args.optimizer == 'rmsprop':
@@ -94,7 +124,7 @@ def train(args):
 	# train and test model
 	myCallbacks = []
 	if args.eval_on_epoch:
-		evl = Evaluator(args, output_dir, timestr, myMetrics, test_x, test_y, vocabReverseDict, pred_vocabReverseDict)
+		evl = Evaluator(args, output_dir, timestr, myMetrics, test_x, test_y, vocabReverseDict, pred_vocabReverseDict, use_argm=use_argm)
 		myCallbacks.append(evl)
 	if args.earlystop:
 		earlystop = EarlyStopping(patience = args.earlystop, verbose=1, mode='auto')

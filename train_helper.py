@@ -22,7 +22,8 @@ parser.add_argument("--activation", dest="activation", type=str, metavar='<str>'
 parser.add_argument("--embedding-dim", dest="embd_dim", type=int, metavar='<int>', default=50, help="Embeddings dimension (default=50)")
 parser.add_argument("--cnn-kernel", dest="cnn_dim", type=int, metavar='<int>', default=0, help="CNN output dimension. '0' means no CNN layer (default=0)")
 parser.add_argument("--cnn-win", dest="cnn_window_size", type=int, metavar='<int>', default=3, help="CNN window size. (default=3)")
-parser.add_argument("--rnn-dim", dest="rnn_dim", type=int, metavar='<int>', default=0, help="RNN dimension. '0' means no RNN layer (default=0)")
+parser.add_argument("--rnn-dim", dest="rnn_dim", type=int, metavar='<int>', default=4, help="RNN dimension (default=4)")
+parser.add_argument("--rnn-layer", dest="rnn_layer", type=int, metavar='<int>', default=2, help="RNN layers (default=2)")
 parser.add_argument("--train-batch-size", dest="train_batch_size", type=int, metavar='<int>', default=8, help="Train Batch size (default=8)")
 parser.add_argument("--eval-batch-size", dest="eval_batch_size", type=int, metavar='<int>', default=8, help="Eval Batch size (default=8)")
 parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.4, help="The dropout probability. To disable, give a negative number (default=0.4)")
@@ -45,9 +46,10 @@ parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar
 parser.add_argument("--seq2seq", dest="seq2seq", type=int, metavar='<int>', default=0, help="Use Seq2Seq Model")
 parser.add_argument("--attention", dest="attention", action='store_true', help="Use Attention Wrapper")
 parser.add_argument("--save-model", dest="save_model", action='store_true', help="Save Model Parameters")
+parser.add_argument("--model", dest="model", type=str, metavar='<str>', default='seq2seq', help="Model Type: seq2seq, categ")
 args = parser.parse_args()
 
-from sq2sq.processing import train
+from src.processing import train
 train(args)
 
 print('\a')
