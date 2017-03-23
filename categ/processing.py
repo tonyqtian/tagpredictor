@@ -63,8 +63,13 @@ def train(args):
 		optimizer = RMSprop(lr=args.learning_rate)
 	else:
 		optimizer = args.optimizer
+	if args.loss == 'my_binary_crossentropy':
+		from util.my_optimizer import my_binary_crossentropy
+		loss = my_binary_crossentropy
+	else:
+		loss = args.loss
 	myMetrics = 'fmeasure'
-	rnnmodel.compile(loss=args.loss, optimizer=optimizer, metrics=[myMetrics])
+	rnnmodel.compile(loss=loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
 	
 	# train and test model
