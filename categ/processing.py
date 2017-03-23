@@ -58,8 +58,11 @@ def train(args):
 	test_y = to_categoricalAll(test_y, len(pred_vocabDict))
 	# create model 
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
-	from keras.optimizers import RMSprop
-	optimizer = RMSprop(lr=args.learning_rate)
+	if args.optimizer == 'rmsprop':
+		from keras.optimizers import RMSprop
+		optimizer = RMSprop(lr=args.learning_rate)
+	else:
+		optimizer = args.optimizer
 	myMetrics = 'fmeasure'
 	rnnmodel.compile(loss=args.loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
