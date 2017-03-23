@@ -33,8 +33,8 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 	if args.seq2seq:
 		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), peek=True, depth=2))
 	else:
-		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
-		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
+		for _ in range(args.rnn_layer-1):
+			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
 		if args.attention:			
 			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)))
 		else:

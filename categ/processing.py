@@ -5,6 +5,8 @@ Created on Mar 17, 2017
 '''
 import matplotlib
 matplotlib.use('Agg')
+import tensorflow as tf
+tf.logging.set_verbosity(tf.logging.WARN)
 
 import logging, time
 from keras.callbacks import EarlyStopping
