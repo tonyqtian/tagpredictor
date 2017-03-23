@@ -41,11 +41,11 @@ def train(args):
 		unk = ''
 		eof = None
 	else:
-		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2)
+		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3)
 		embdw2v = None
 		unk = '<unk>'
 		eof = '<EOF>'
-	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=1)
+	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3)
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
 	
