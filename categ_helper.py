@@ -45,6 +45,7 @@ parser.add_argument("--w2v-embedding", dest="w2v", action='store_true', help="Us
 parser.add_argument("--learning-rate", dest="learning_rate", type=float, metavar='<float>', default=0.01, help="Optimizer learning rate")
 parser.add_argument("--seq2seq", dest="seq2seq", type=int, metavar='<int>', default=0, help="Use Seq2Seq Model")
 parser.add_argument("--attention", dest="attention", action='store_true', help="Use Attention Wrapper")
+parser.add_argument("--save-model", dest="save_model", action='store_true', help="Save Model Parameters")
 args = parser.parse_args()
 
 from categ.processing import train

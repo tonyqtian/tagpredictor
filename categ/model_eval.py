@@ -34,6 +34,7 @@ class Evaluator(Callback):
 		self.test_f1s = []
 		self.plot = args.plot
 		self.evl_pred = args.show_evl_pred
+		self.save_model = args.save_model
 		self.reVocab = reVocab
 		self.pred_reVocab = pred_reVocab
 		
@@ -62,6 +63,9 @@ class Evaluator(Callback):
 		self.eval(self.model, epoch, print_info=True)
 		if self.plot:
 			self.plothem()
+		if self.save_model:
+			if epoch > 10:
+				self.model.save_weights(self.out_dir + '/' + self.timestr + 'best_model_weights.h5', overwrite=True)
 		return
 
 	def plothem(self):

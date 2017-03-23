@@ -67,6 +67,19 @@ def train(args):
 	myMetrics = 'fmeasure'
 	rnnmodel.compile(loss=args.loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
+
+	if args.save_model:
+		## Plotting model
+		logger.info('Plotting model architecture')
+		from keras.utils.visualize_util import plot	
+		plot(rnnmodel, to_file = output_dir + '/' + timestr + 'model_plot.png')
+		logger.info('  Done')
+			
+		## Save model architecture
+		logger.info('Saving model architecture')
+		with open(output_dir + '/'+ timestr + 'model_config.json', 'w') as arch:
+			arch.write(rnnmodel.to_json(indent=2))
+		logger.info('  Done')
 	
 	# train and test model
 	myCallbacks = []
