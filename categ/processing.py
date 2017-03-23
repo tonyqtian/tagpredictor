@@ -11,9 +11,10 @@ matplotlib.use('Agg')
 import logging, time
 from keras.callbacks import EarlyStopping
 from util.utils import setLogger, mkdir
+from util.model_eval import Evaluator
+from util.w2v_embedding import makeEmbedding
 from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll
-from categ.model_processing import getModel, makeEmbedding
-from categ.model_eval import Evaluator
+from categ.model_processing import getModel
 
 logger = logging.getLogger(__name__)
 
@@ -44,11 +45,12 @@ def train(args):
 	else:
 		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<unk>'])
 		embdw2v = None
-		unk = vocabReverseDict[1]
+		unk = '<unk>'
 	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=[])
 	pred_unk = None
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
+	
 	# word to padded numerical np array
 	train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre')
 	test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre')
@@ -56,22 +58,26 @@ def train(args):
 	train_y = to_categoricalAll(train_y, len(pred_vocabDict))
 	test_y = word2num(test_tag, pred_vocabDict, pred_unk, outputLength)
 	test_y = to_categoricalAll(test_y, len(pred_vocabDict))
+
 	# create model 
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
+
 	if args.optimizer == 'rmsprop':
 		from keras.optimizers import RMSprop
 		optimizer = RMSprop(lr=args.learning_rate)
 	else:
 		optimizer = args.optimizer
+
 	if args.loss == 'my_binary_crossentropy':
 		from util.my_optimizer import my_binary_crossentropy
 		loss = my_binary_crossentropy
 	else:
 		loss = args.loss
+
 	myMetrics = 'fmeasure'
 	rnnmodel.compile(loss=loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
-	
+
 	if args.save_model:
 		## Plotting model
 		logger.info('Plotting model architecture')

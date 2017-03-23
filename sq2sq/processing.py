@@ -9,9 +9,10 @@ matplotlib.use('Agg')
 import logging, time
 from keras.callbacks import EarlyStopping
 from util.utils import setLogger, mkdir
+from util.model_eval import Evaluator
+from util.w2v_embedding import makeEmbedding
 from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D
-from sq2sq.model_processing import getModel, makeEmbedding
-from sq2sq.model_eval import Evaluator
+from sq2sq.model_processing import getModel
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,8 @@ def train(args):
 	train_body = tableMerge([train_title, train_content])
 	test_body = tableMerge([test_title, test_content])
 	
-	train_body, train_maxLen = tokenizeIt(train_body, clean=True)
-	test_body, test_maxLen = tokenizeIt(test_body, clean=True)
+	train_body, _ = tokenizeIt(train_body, clean=True)
+	test_body, _ = tokenizeIt(test_body, clean=True)
 	train_tag, _ = tokenizeIt(train_tag)
 	test_tag, _ = tokenizeIt(test_tag)
 # 	inputLength = max(train_maxLen, test_maxLen)
@@ -38,14 +39,14 @@ def train(args):
 	
 	if args.w2v:
 		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-		unk = ''
+		unk = None
 		eof = None
 	else:
-		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3)
+		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
 		embdw2v = None
 		unk = '<unk>'
 		eof = '<EOF>'
-	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3)
+	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
 	
@@ -56,16 +57,24 @@ def train(args):
 	train_y = to_categorical2D(train_y, len(pred_vocabDict))
 	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength, padding='post', eof=eof)
 	test_y = to_categorical2D(test_y, len(pred_vocabDict))
-	
+
 	# create model 
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
+
 	if args.optimizer == 'rmsprop':
 		from keras.optimizers import RMSprop
 		optimizer = RMSprop(lr=args.learning_rate)
 	else:
 		optimizer = args.optimizer
+
+	if args.loss == 'my_binary_crossentropy':
+		from util.my_optimizer import my_binary_crossentropy
+		loss = my_binary_crossentropy
+	else:
+		loss = args.loss
+
 	myMetrics = 'fmeasure'
-	rnnmodel.compile(loss=args.loss, optimizer=optimizer, metrics=[myMetrics])
+	rnnmodel.compile(loss=loss, optimizer=optimizer, metrics=[myMetrics])
 	rnnmodel.summary()
 
 	if args.save_model:
@@ -84,7 +93,7 @@ def train(args):
 	# train and test model
 	myCallbacks = []
 	if args.eval_on_epoch:
-		evl = Evaluator(args, output_dir, timestr, myMetrics, test_x, test_y, vocabReverseDict, pred_vocabReverseDict)
+		evl = Evaluator(args, output_dir, timestr, myMetrics, test_x, test_y, vocabReverseDict, pred_vocabReverseDict, use_argm=True)
 		myCallbacks.append(evl)
 	if args.earlystop:
 		earlystop = EarlyStopping(patience = args.earlystop, verbose=1, mode='auto')

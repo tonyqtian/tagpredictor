@@ -6,19 +6,20 @@ Created on Mar 18, 2017
 import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
-from util.eval_metrics import f1_score_prec_rec
+from numpy import argmax
 from util.data_processing import categorical_toary
+from util.eval_metrics import f1_score_prec_rec
 
 logger = logging.getLogger(__name__)
 
 class Evaluator(Callback):
 	
-	def __init__(self, args, out_dir, timestr, metric, test_x, test_y, reVocab, pred_reVocab):
+	def __init__(self, args, out_dir, timestr, metric, test_x, test_y, reVocab, pred_reVocab, use_argm=False):
 		self.out_dir = out_dir
 		self.test_x = test_x
 		self.test_y = test_y
-		self.best_test = -1
-		self.best_epoch = -1
+		self.best_f1 = 0
+		self.best_epoch = 0
 		self.batch_size = args.eval_batch_size
 		self.metric = metric
 		self.val_metric = 'val_' + metric
@@ -37,35 +38,46 @@ class Evaluator(Callback):
 		self.save_model = args.save_model
 		self.reVocab = reVocab
 		self.pred_reVocab = pred_reVocab
+		self.use_argm = use_argm
 		
-	def eval(self, model, epoch, print_info=False):
+	def eval(self, model, epoch):
 # 		self.test_loss, self.test_metric = model.evaluate(self.test_x, self.test_y, batch_size=self.batch_size)
 # 		self.test_losses.append(self.test_loss)
 # 		self.test_accs.append(self.test_metric)
 		if self.evl_pred:
 			pred = model.predict(self.test_x, batch_size=self.batch_size)
+			if self.use_argm:
+				preds = argmax(pred, axis=-1)
+				reals = argmax(self.test_y, axis=-1)
+				precision, recall, f1_score = f1_score_prec_rec(reals, preds, make_unique=True, remove_pad=[0,1])
+			else:
+				preds = categorical_toary(pred, round01=True)
+				reals = categorical_toary(self.test_y)
+				precision, recall, f1_score = f1_score_prec_rec(reals, preds)
+
 			print(pred[:self.evl_pred])
-			preds = categorical_toary(pred, round01=True)
 			print(preds[:self.evl_pred])
-			reals = categorical_toary(self.test_y)
-			precision, recall, f1_score = f1_score_prec_rec(reals, preds)
 			self.test_f1s.append(f1_score)
 			self.test_recalls.append(recall)
 			self.test_precisions.append(precision)
 			self.print_pred(self.test_x[:self.evl_pred], preds[:self.evl_pred], reals[:self.evl_pred])
 			self.print_info(epoch, precision, recall, f1_score)
+			
+			if self.save_model:
+				if f1_score > self.best_f1:
+					self.best_f1 = f1_score
+					self.best_epoch = epoch
+					self.model.save_weights(self.out_dir + '/' + self.timestr + 'best_model_weights.h5', overwrite=True)
+				self.print_best()
 
 	def on_epoch_end(self, epoch, logs={}):
 		self.losses.append(logs.get('loss'))
 		self.val_losses.append(logs.get('val_loss'))
 		self.accs.append(logs.get(self.metric))
 		self.val_accs.append(logs.get(self.val_metric))
-		self.eval(self.model, epoch, print_info=True)
+		self.eval(self.model, epoch)
 		if self.plot:
 			self.plothem()
-		if self.save_model:
-			if epoch > 10:
-				self.model.save_weights(self.out_dir + '/' + self.timestr + 'best_model_weights.h5', overwrite=True)
 		return
 
 	def plothem(self):
@@ -100,3 +112,6 @@ class Evaluator(Callback):
 	def print_info(self, epoch, precision, recall, f1score):
 		logger.info('[Test]  Epoch: %i' % epoch)
 		logger.info('[Test]  F1-Score: %.4f, Precision: %.4f, Recall: %.4f' % (f1score, precision, recall))
+
+	def print_best(self):
+		logger.info('[Test]  Best @ Epoch %i: F1-Score: %.4f' % (self.best_epoch, self.best_f1))

@@ -8,17 +8,18 @@ from keras.models import Sequential
 from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM
 # from keras.layers.wrappers import Bidirectional, TimeDistributed
-from keras.layers.core import Dense, Activation, Dropout
-from gensim.models.word2vec import Word2Vec
+from keras.layers.core import Activation, Dropout
 from util.attention_wrapper import Attention
-from seq2seq import Seq2Seq
+from util.my_layers import DenseWithMasking
 
 logger = logging.getLogger(__name__)
 
 def getModel(args, input_length, output_length, vocab_size, pred_size, embd, embd_trainable=True):
 	embd_dim = args.embd_dim
 	rnn_opt = args.rnn_opt
-	rnn_dim = args.rnn_dim	
+	rnn_dim = args.rnn_dim
+	dropout_W = args.dropout_w
+	dropout_U = args.dropout_u
 	if args.activation == 'sigmoid':
 		final_init = 'he_normal'
 	else:
@@ -31,53 +32,13 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable, batch_input_shape=(None, input_length)))
 	
 	for _ in range(args.rnn_layer-1):
-		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt))
+		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
+		model.add(Dropout(args.dropout_prob))
 	if args.attention:			
-		model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt)))
+		model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U)))
 	else:
-		model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt))
+		model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
+	model.add(Dropout(args.dropout_prob))
 	model.add(DenseWithMasking(pred_size, init=final_init))
 	model.add(Activation(args.activation))
 	return model
-
-def makeEmbedding(args, inputTable):
-	sentenceList = []
-	for tbl in inputTable:
-		sentenceList.extend(tbl)
-	logger.info('  Total %i lines info for word2vec processing ' % (len(sentenceList)))
-	
-	class SentenceGenerator(object):
-		def __init__(self, sentList):
-			self.sentList = sentList
-		
-		def __iter__(self):
-			for line in self.sentList:
-				yield line
-				
-	sentences = SentenceGenerator(sentenceList)
-	w2vModel = Word2Vec(sentences, min_count=2, size=args.embd_dim)
-# 	w2vModel.save('../data/embd_model.bin')
-	embdWeights = w2vModel.wv.syn0
-	print(embdWeights.shape)
-	
-	vocabDict = dict([(k, v.index) for k, v in w2vModel.wv.vocab.items()])
-	logger.info('  Vocabulary size %i ' % (len(vocabDict)))
-# 	print(vocabDict)
-	import operator
-	sorted_word = sorted(vocabDict.items(), key=operator.itemgetter(1), reverse=False)
-	vocabReverseDict = []
-	for word, _ in sorted_word:
-		vocabReverseDict.append(word)
-# 	print(vocabReverseDict)
-	# eval will take hours without word limiting
-# 	w2vModel.accuracy('../data/questions-words.txt')
-	del w2vModel
-	return embdWeights, vocabDict, vocabReverseDict
-
-class DenseWithMasking(Dense):
-	def __init__(self, output_dim, **kwargs):
-		self.supports_masking = True
-		super(DenseWithMasking, self).__init__(output_dim, **kwargs)
-	
-	def compute_mask(self, x, mask=None):
-		return None
