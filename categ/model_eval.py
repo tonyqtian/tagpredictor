@@ -43,7 +43,7 @@ class Evaluator(Callback):
 # 		self.test_accs.append(self.test_metric)
 		if self.evl_pred:
 			pred = model.predict(self.test_x, batch_size=self.batch_size)
-			preds = categorical_toary(pred)
+			preds = categorical_toary(pred, round01=True)
 			reals = categorical_toary(self.test_y)
 			precision, recall, f1_score = f1_score_prec_rec(reals, preds)
 			self.test_f1s.append(f1_score)

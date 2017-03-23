@@ -52,7 +52,7 @@ def recall(y_true, y_pred, argm=False):
 	return recall
 
 
-def f1_score_prec_rec(y_true, y_pred, beta=1, argm=False):
+def f1_score_prec_rec(y_true, y_pred, beta=1, argm=False, make_unique=False, remove_pad=[]):
 	"""Computes the F score.
 	The F score is the weighted harmonic mean of precision and recall.
 	Here it is only computed as a batch-wise average, not globally.
@@ -79,15 +79,17 @@ def f1_score_prec_rec(y_true, y_pred, beta=1, argm=False):
 	possible_positive = 0
 	epsilon = np.finfo(float).eps
 	for (y_true_line, y_pred_line) in zip(y_true, y_pred):
-		y_pred_line = np.unique(y_pred_line)
-		y_pred_line = np.delete(y_pred_line, np.argwhere(y_pred_line==0))
-		y_pred_line = np.delete(y_pred_line, np.argwhere(y_pred_line==1))
-		y_true_line = np.unique(y_true_line)
-		y_true_line = np.delete(y_true_line, np.argwhere(y_true_line==0))
-		y_true_line = np.delete(y_true_line, np.argwhere(y_true_line==1))
+		if make_unique:
+			y_pred_line = np.unique(y_pred_line)
+			y_true_line = np.unique(y_true_line)
+		for item1 in remove_pad:
+			y_pred_line = np.delete(y_pred_line, np.argwhere(y_pred_line==item1))
+			y_true_line = np.delete(y_true_line, np.argwhere(y_true_line==item1))
 		true_positive += len(np.intersect1d(y_true_line, y_pred_line, assume_unique=True))
-		predicted_positive += np.sum(np.around(np.clip(y_pred_line, 0, 1)))
-		possible_positive += np.sum(np.around(np.clip(y_true_line, 0, 1)))
+		predicted_positive += len(y_pred_line)
+		possible_positive += len(y_true_line)
+# 		predicted_positive += np.sum(np.around(np.clip(y_pred_line, 0, 1)))
+# 		possible_positive += np.sum(np.around(np.clip(y_true_line, 0, 1)))
 	precision = true_positive / (predicted_positive + epsilon)
 	recall = true_positive / (possible_positive + epsilon)
 	# If there are no true positives, fix the F score at 0 like sklearn.

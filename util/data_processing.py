@@ -63,7 +63,7 @@ def tokenizeIt(table, clean=False):
 				maxLen = len(text)
 	return tokenizedTable, maxLen		
 	
-def createVocab(tableList, min_count=1, vocabReverseDict=['<pad>', '<EOF>', '<unk>']):
+def createVocab(tableList, min_count=1, reservedList=['<pad>', '<EOF>', '<unk>']):
 	logger.info(' Creating vocabulary ')
 	contentList = []
 	for list1 in tableList:
@@ -85,16 +85,16 @@ def createVocab(tableList, min_count=1, vocabReverseDict=['<pad>', '<EOF>', '<un
 		if freq >= min_count:
 			vocab_size += 1
 	vocabDict = {}
+	vocabReverseDict = []
 	idx = 0
-	for item1 in vocabReverseDict:
+	for item1 in reservedList:
 		vocabDict[item1] = idx
+		vocabReverseDict.append(item1)
 		idx += 1
-	vocabLen = len(vocabDict)
-	index = vocabLen
-	for word, _ in sorted_word_freqs[:vocab_size - vocabLen]:
-		vocabDict[word] = index
-		index += 1
+	for word, _ in sorted_word_freqs[:vocab_size]:
+		vocabDict[word] = idx
 		vocabReverseDict.append(word)
+		idx += 1
 		
 	logger.info('  vocab size %i ' % len(vocabReverseDict))
 	return vocabDict, vocabReverseDict
@@ -139,8 +139,10 @@ def to_categoricalAll(y, nb_classes):
 		line_idx += 1
 	return categorical
 
-def categorical_toary(y):
+def categorical_toary(y, round01=False):
 	(length, nb_classes) = y.shape
+	if round01:
+		y = np.around(y)
 	y_ary = []
 	for i in range(length):
 		y_ary.append(np.argwhere(y[i,:] == 1).ravel().tolist())

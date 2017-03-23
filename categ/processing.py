@@ -4,7 +4,6 @@ Created on Mar 17, 2017
 @author: tonyq
 '''
 import matplotlib
-from keras.backend.tensorflow_backend import categorical_crossentropy
 matplotlib.use('Agg')
 
 import logging, time
@@ -41,10 +40,10 @@ def train(args):
 		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
 		unk = None
 	else:
-		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2, vocabReverseDict=['<pad>', '<unk>'])
+		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2, reservedList=['<pad>', '<unk>'])
 		embdw2v = None
 		unk = vocabReverseDict[1]
-	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, vocabReverseDict=[])
+	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=2, reservedList=[])
 	pred_unk = None
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)

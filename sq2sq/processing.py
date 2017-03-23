@@ -53,12 +53,12 @@ def train(args):
 	train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre',eof=eof)
 	test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre', eof=eof)
 	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength, padding='post', eof=eof)
-	train_y = to_categorical2D(train_y, len(pred_vocabDict)+1)
+	train_y = to_categorical2D(train_y, len(pred_vocabDict))
 	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength, padding='post', eof=eof)
-	test_y = to_categorical2D(test_y, len(pred_vocabDict)+1)
+	test_y = to_categorical2D(test_y, len(pred_vocabDict))
 	
 	# create model 
-	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict)+1, embd=embdw2v)
+	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 	from keras.optimizers import RMSprop
 	optimizer = RMSprop(lr=args.learning_rate)
 	myMetrics = 'fmeasure'

@@ -45,7 +45,7 @@ class Evaluator(Callback):
 			pred = model.predict(self.test_x, batch_size=self.batch_size)
 			preds = argmax(pred, axis=-1)
 			reals = argmax(self.test_y, axis=-1)
-			precision, recall, f1_score = f1_score_prec_rec(reals, preds)
+			precision, recall, f1_score = f1_score_prec_rec(reals, preds, make_unique=True, remove_pad=[0,1])
 			self.test_f1s.append(f1_score)
 			self.test_recalls.append(recall)
 			self.test_precisions.append(precision)
