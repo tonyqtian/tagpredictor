@@ -10,7 +10,7 @@ from keras.layers.recurrent import LSTM
 from keras.layers.wrappers import Bidirectional, TimeDistributed
 from keras.layers.core import Dense, RepeatVector, Activation, Dropout
 from gensim.models.word2vec import Word2Vec
-from src.attention_wrapper import Attention
+from util.attention_wrapper import Attention
 from seq2seq import Seq2Seq
 
 logger = logging.getLogger(__name__)

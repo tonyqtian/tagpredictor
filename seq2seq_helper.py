@@ -46,7 +46,7 @@ parser.add_argument("--seq2seq", dest="seq2seq", action='store_true', help="Use 
 parser.add_argument("--attention", dest="attention", action='store_true', help="Use Attention Wrapper")
 args = parser.parse_args()
 
-from src.processing import train
+from sq2sq.processing import train
 train(args)
 
 print('\a')

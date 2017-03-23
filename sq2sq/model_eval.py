@@ -7,7 +7,7 @@ import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
 from numpy import argmax
-from src.eval_metrics import f1_score_prec_rec
+from util.eval_metrics import f1_score_prec_rec
 
 logger = logging.getLogger(__name__)
 

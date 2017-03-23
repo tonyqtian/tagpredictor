@@ -9,9 +9,8 @@ matplotlib.use('Agg')
 
 import logging, time
 from keras.callbacks import EarlyStopping
-from src.utils import setLogger, mkdir
-from categ.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll,\
-	categorical_toary
+from util.utils import setLogger, mkdir
+from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categoricalAll
 from categ.model_processing import getModel, makeEmbedding
 from categ.model_eval import Evaluator
 
@@ -42,18 +41,19 @@ def train(args):
 		embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
 		unk = None
 	else:
-		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2)
+		vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=2, vocabReverseDict=['<pad>', '<unk>'])
 		embdw2v = None
-		unk = '<unk>'
-	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=1)
+		unk = vocabReverseDict[1]
+	pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, vocabReverseDict=[])
+	pred_unk = None
 	# logger.info(vocabDict)
 	logger.info(pred_vocabReverseDict)
 	# word to padded numerical np array
 	train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre')
 	test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre')
-	train_y = word2num(train_tag, pred_vocabDict, unk, outputLength)
+	train_y = word2num(train_tag, pred_vocabDict, pred_unk, outputLength)
 	train_y = to_categoricalAll(train_y, len(pred_vocabDict))
-	test_y = word2num(test_tag, pred_vocabDict, unk, outputLength)
+	test_y = word2num(test_tag, pred_vocabDict, pred_unk, outputLength)
 	test_y = to_categoricalAll(test_y, len(pred_vocabDict))
 	# create model 
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)

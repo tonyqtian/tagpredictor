@@ -6,9 +6,8 @@ Created on Mar 18, 2017
 import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
-from numpy import argmax
-from categ.eval_metrics import f1_score_prec_rec
-from categ.data_processing import categorical_toary
+from util.eval_metrics import f1_score_prec_rec
+from util.data_processing import categorical_toary
 
 logger = logging.getLogger(__name__)
 
