@@ -43,7 +43,9 @@ class Evaluator(Callback):
 # 		self.test_accs.append(self.test_metric)
 		if self.evl_pred:
 			pred = model.predict(self.test_x, batch_size=self.batch_size)
+			print(pred[:self.evl_pred])
 			preds = argmax(pred, axis=-1)
+			print(preds[:self.evl_pred])
 			reals = argmax(self.test_y, axis=-1)
 			precision, recall, f1_score = f1_score_prec_rec(reals, preds, make_unique=True, remove_pad=[0,1])
 			self.test_f1s.append(f1_score)
