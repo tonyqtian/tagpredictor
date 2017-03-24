@@ -75,13 +75,13 @@ class Evaluator(Callback):
 		self.val_losses.append(logs.get('val_loss'))
 		self.accs.append(logs.get(self.metric))
 		self.val_accs.append(logs.get(self.val_metric))
-		self.eval(self.model, epoch)
+		self.eval(self.model, epoch+1)
 		if self.plot:
 			self.plothem()
 		return
 
 	def plothem(self):
-		training_epochs = [i for i in range(len(self.losses))]
+		training_epochs = [i+1 for i in range(len(self.losses))]
 		plt.plot(training_epochs, self.losses, 'b', label='Train Loss')
 		plt.plot(training_epochs, self.accs, 'r.', label='Train Metric')
 		plt.plot(training_epochs, self.val_losses, 'g', label='Valid Loss')

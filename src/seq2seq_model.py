@@ -32,17 +32,24 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 						peek=True, dropout=args.dropout_prob, depth=args.seq2seq))
 	else:
 		# encoder
-		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
-		model.add(Dropout(args.dropout_prob))
+# 		model.add(Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt,
+# 									 dropout_W=dropout_W, dropout_U=dropout_U)))
+# 		model.add(Dropout(args.dropout_prob))
 		if args.attention:
-			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
+			model.add(Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt,
+										 dropout_W=dropout_W, dropout_U=dropout_U)))
+			model.add(Dropout(args.dropout_prob))
+			model.add(TimeDistributed(Dense(rnn_dim)))
 		else:
-			model.add(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
-		model.add(Dropout(args.dropout_prob))
-# 		model.add(Activation('relu'))
+			model.add(Bidirectional(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt,
+										 dropout_W=dropout_W, dropout_U=dropout_U)))
+			model.add(Dropout(args.dropout_prob))
+			model.add(Dense(rnn_dim))
+		model.add(Activation('relu'))
 		# decoder
 		if args.attention:
-			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U)))
+			model.add(Attention(LSTM(rnn_dim, return_sequences=False, consume_less=rnn_opt,
+									 dropout_W=dropout_W, dropout_U=dropout_U)))
 		else:
 			model.add(RepeatVector(output_length))
 			model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
