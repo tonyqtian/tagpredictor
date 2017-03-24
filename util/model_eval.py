@@ -86,6 +86,10 @@ class Evaluator(Callback):
 		plt.plot(training_epochs, self.accs, 'r.', label='Train Metric')
 		plt.plot(training_epochs, self.val_losses, 'g', label='Valid Loss')
 		plt.plot(training_epochs, self.val_accs, 'y.', label='Valid Metric')
+		plt.legend()
+		plt.xlabel('epochs')
+		plt.savefig(self.out_dir + '/' + self.timestr + 'LossAccuracy.png')
+		plt.close()
 # 		plt.plot(training_epochs, self.test_losses, 'k', label='Test Loss')
 # 		plt.plot(training_epochs, self.test_accs, 'c.', label='Test Metric')
 		plt.plot(training_epochs, self.test_f1s, 'k', label='Test F1-Score')
@@ -93,7 +97,7 @@ class Evaluator(Callback):
 		plt.plot(training_epochs, self.test_recalls, 'm.', label='Test Recall')
 		plt.legend()
 		plt.xlabel('epochs')
-		plt.savefig(self.out_dir + '/' + self.timestr + 'LossAccuracy.png')
+		plt.savefig(self.out_dir + '/' + self.timestr + 'F1score.png')
 		plt.close()
 
 	def print_pred(self, infers, preds, reals):

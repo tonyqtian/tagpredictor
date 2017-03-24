@@ -9,6 +9,7 @@ matplotlib.use('Agg')
 # tf.logging.set_verbosity(tf.logging.WARN)
 
 import logging, time
+import pickle as pkl
 from keras.callbacks import EarlyStopping
 from util.utils import setLogger, mkdir, print_args
 from util.model_eval import Evaluator
@@ -52,7 +53,7 @@ def train(args):
 			eof = '<EOF>'
 		pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
 		# logger.info(vocabDict)
-		logger.info(pred_vocabReverseDict)		
+		logger.info(pred_vocabReverseDict)
 		# word to padded numerical np array
 		train_x = word2num(train_body, vocabDict, unk, inputLength, padding='pre',eof=eof)
 		test_x = word2num(test_body, vocabDict, unk, inputLength, padding='pre', eof=eof)
@@ -90,6 +91,10 @@ def train(args):
 		
 		# choose model 
 		from src.categ_model import getModel
+		
+	# Dump vocab
+	with open(output_dir + '/'+ timestr + 'vocab.pkl', 'wb') as vocab_file:
+		pkl.dump((vocabReverseDict, pred_vocabReverseDict), vocab_file)
 		
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 

@@ -39,10 +39,13 @@ def get_words(text):
 	text = text.replace("\\", " ")
 	return word_tokenize(text)
 	
-def get_pdTable(path):
+def get_pdTable(path, notag=False):
 	logger.info(' Processing pandas csv ')
 	pdtable = pd.read_csv(path)
-	return pdtable.id, pdtable.title, pdtable.content, pdtable.tags
+	if notag:
+		return pdtable.id, pdtable.title, pdtable.content
+	else:
+		return pdtable.id, pdtable.title, pdtable.content, pdtable.tags
 
 def tableMerge(tableList):
 	return [' '.join(str1) for str1 in zip(*tableList)]
