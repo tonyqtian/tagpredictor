@@ -32,9 +32,10 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 						peek=True, dropout=args.dropout_prob, depth=args.seq2seq))
 	else:
 		# encoder
-# 		model.add(Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt,
-# 									 dropout_W=dropout_W, dropout_U=dropout_U)))
-# 		model.add(Dropout(args.dropout_prob))
+		for _ in range(args.rnn_layer-1):
+			model.add(Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt,
+									 	dropout_W=dropout_W, dropout_U=dropout_U)))
+			model.add(Dropout(args.dropout_prob))
 		if args.attention:
 			model.add(Bidirectional(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt,
 										 dropout_W=dropout_W, dropout_U=dropout_U)))

@@ -47,6 +47,7 @@ parser.add_argument("--seq2seq", dest="seq2seq", type=int, metavar='<int>', defa
 parser.add_argument("--attention", dest="attention", action='store_true', help="Use Attention Wrapper")
 parser.add_argument("--save-model", dest="save_model", action='store_true', help="Save Model Parameters")
 parser.add_argument("--model", dest="model", type=str, metavar='<str>', default='seq2seq', help="Model Type: seq2seq, categ")
+parser.add_argument("--bi-directional", dest="bidirectional", action='store_true', help="Use Bi-directional RNN")
 args = parser.parse_args()
 
 from src.processing import train

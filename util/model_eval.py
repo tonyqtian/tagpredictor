@@ -7,7 +7,7 @@ import logging
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
 from numpy import argmax
-from util.data_processing import categorical_toary
+from util.data_processing import prob_top_n
 from util.eval_metrics import f1_score_prec_rec
 
 logger = logging.getLogger(__name__)
@@ -51,8 +51,8 @@ class Evaluator(Callback):
 				reals = argmax(self.test_y, axis=-1)
 				precision, recall, f1_score = f1_score_prec_rec(reals, preds, make_unique=True, remove_pad=[0,1])
 			else:
-				preds = categorical_toary(pred, round01=True)
-				reals = categorical_toary(self.test_y)
+				preds = prob_top_n(pred, top=5)
+				reals = prob_top_n(self.test_y, top=5)
 				precision, recall, f1_score = f1_score_prec_rec(reals, preds)
 
 			print(pred[:self.evl_pred])

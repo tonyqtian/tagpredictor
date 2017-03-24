@@ -13,6 +13,7 @@ from keras.preprocessing.sequence import pad_sequences
 from tqdm._tqdm import tqdm
 from nltk.tokenize import word_tokenize
 from numpy import array, zeros
+import operator
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ def createVocab(tableList, min_count=1, reservedList=['<pad>', '<EOF>', '<unk>']
 				wdFrq[wd] = 1
 			total_words += 1
 	logger.info('  %i total words, %i unique words ' % (total_words, len(wdFrq)))
-	import operator
+
 	sorted_word_freqs = sorted(wdFrq.items(), key=operator.itemgetter(1), reverse=True)
 	vocab_size = 0
 	for _, freq in sorted_word_freqs:
@@ -146,4 +147,18 @@ def categorical_toary(y, round01=False):
 	y_ary = []
 	for i in range(length):
 		y_ary.append(np.argwhere(y[i,:] == 1).ravel().tolist())
+	return y_ary
+
+def prob_top_n(y, top=5):
+	(length, nb_classes) = y.shape
+	y_ary = []
+	for i in range(length):
+		idx_prob = list(zip(list(range(nb_classes)), y[i,:]))
+		sorted_idx_prob = sorted(idx_prob, key=operator.itemgetter(1), reverse=True)[:top]
+		idx_round = np.around(sorted_idx_prob).astype(int)
+		idx_pos = []
+		for (idx, prob) in idx_round:
+			if prob == 1:
+				idx_pos.append(idx)
+		y_ary.append(idx_pos)
 	return y_ary
