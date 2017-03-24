@@ -91,10 +91,12 @@ def train(args):
 		
 		# choose model 
 		from src.categ_model import getModel
-		
+	else:
+		raise NotImplementedError	
+	
 	# Dump vocab
 	with open(output_dir + '/'+ timestr + 'vocab.pkl', 'wb') as vocab_file:
-		pkl.dump((vocabReverseDict, pred_vocabReverseDict), vocab_file)
+		pkl.dump((vocabDict, vocabReverseDict, pred_vocabDict, pred_vocabReverseDict), vocab_file)
 		
 	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 
