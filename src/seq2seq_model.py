@@ -28,7 +28,8 @@ def getModel(args, input_length, output_length, vocab_size, pred_size, embd, emb
 		model.add(Embedding(vocab_size, embd_dim, mask_zero=True, weights=[embd], trainable=embd_trainable, input_shape=(input_length,)))
 	
 	if args.seq2seq:
-		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), peek=True, depth=args.seq2seq))
+		model.add(Seq2Seq(output_dim=pred_size, output_length=output_length, input_shape=(input_length, embd_dim), 
+						peek=True, dropout=args.dropout_prob, depth=args.seq2seq))
 	else:
 		# encoder
 		model.add(LSTM(rnn_dim, return_sequences=True, consume_less=rnn_opt, dropout_W=dropout_W, dropout_U=dropout_U))
