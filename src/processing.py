@@ -10,7 +10,7 @@ matplotlib.use('Agg')
 
 import logging, time
 from keras.callbacks import EarlyStopping
-from util.utils import setLogger, mkdir
+from util.utils import setLogger, mkdir, print_args
 from util.model_eval import Evaluator
 from util.w2v_embedding import makeEmbedding
 from util.data_processing import get_pdTable, tableMerge, tokenizeIt, createVocab, word2num, to_categorical2D, to_categoricalAll
@@ -22,6 +22,7 @@ def train(args):
 	output_dir = args.out_dir_path + '/' + time.strftime("%m%d")
 	mkdir(output_dir)
 	setLogger(timestr, out_dir=output_dir)
+	print_args(args)
 	
 	# process train and test data
 	_, train_title, train_content, train_tag = get_pdTable(args.train_path)
