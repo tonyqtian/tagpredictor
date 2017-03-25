@@ -23,7 +23,7 @@ def makeEmbedding(args, inputTable):
 				yield line
 				
 	sentences = SentenceGenerator(sentenceList)
-	w2vModel = Word2Vec(sentences, min_count=2, size=args.embd_dim)
+	w2vModel = Word2Vec(sentences, min_count=2, size=args.embd_dim, null_word=1)
 # 	w2vModel.save('../data/embd_model.bin')
 	embdWeights = w2vModel.wv.syn0
 	print(embdWeights.shape)
