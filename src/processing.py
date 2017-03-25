@@ -42,15 +42,22 @@ def train(args):
 		
 		outputLength = 5 + 1	
 		use_argm = True
-		if args.w2v:
-			embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-			unk = None
-			eof = None
+		if args.load_vocab_from_file:
+			with open(args.load_vocab_from_file, 'rb') as vocab_file:
+				(vocabDict, vocabReverseDict, pred_vocabDict, pred_vocabReverseDict) = pkl.load(vocab_file)
+				embdw2v = None
+				unk = '<unk>'
+				eof = '<EOF>'
 		else:
-			vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
-			embdw2v = None
-			unk = '<unk>'
-			eof = '<EOF>'
+			if args.w2v:
+				embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
+				unk = None
+				eof = None
+			else:
+				vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
+				embdw2v = None
+				unk = '<unk>'
+				eof = '<EOF>'
 		pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=['<pad>', '<EOF>', '<unk>'])
 		# logger.info(vocabDict)
 		logger.info(pred_vocabReverseDict)
@@ -69,14 +76,20 @@ def train(args):
 		outputLength = 1
 		use_argm = False
 		
-		if args.w2v:
-			embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
-			unk = None
+		if args.load_vocab_from_file:
+			with open(args.load_vocab_from_file, 'rb') as vocab_file:
+				(vocabDict, vocabReverseDict, pred_vocabDict, pred_vocabReverseDict) = pkl.load(vocab_file)
+				embdw2v = None
+				unk = '<unk>'
 		else:
-			vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<unk>'])
-			embdw2v = None
-			unk = '<unk>'
-		pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=[])
+			if args.w2v:
+				embdw2v, vocabDict, vocabReverseDict = makeEmbedding(args, [train_body, test_body])
+				unk = None
+			else:
+				vocabDict, vocabReverseDict = createVocab([train_body, test_body], min_count=3, reservedList=['<pad>', '<unk>'])
+				embdw2v = None
+				unk = '<unk>'
+			pred_vocabDict, pred_vocabReverseDict = createVocab([train_tag,], min_count=3, reservedList=['<unk>'])
 		pred_unk = None
 		# logger.info(vocabDict)
 		logger.info(pred_vocabReverseDict)
@@ -95,11 +108,23 @@ def train(args):
 		raise NotImplementedError	
 	
 	# Dump vocab
-	with open(output_dir + '/'+ timestr + 'vocab.pkl', 'wb') as vocab_file:
-		pkl.dump((vocabDict, vocabReverseDict, pred_vocabDict, pred_vocabReverseDict), vocab_file)
+	if not args.load_vocab_from_file:
+		with open(output_dir + '/'+ timestr + 'vocab.pkl', 'wb') as vocab_file:
+			pkl.dump((vocabDict, vocabReverseDict, pred_vocabDict, pred_vocabReverseDict), vocab_file)
+			
+	if args.load_model_json:
+		from keras.models import model_from_json
+		from util.my_layers import DenseWithMasking
+		with open(args.load_model_json, 'r') as json_file:
+			rnnmodel = model_from_json(json_file.read(), custom_objects={"DenseWithMasking": DenseWithMasking})
+		logger.info('Loaded model from saved json')
+	else:
+		rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
 		
-	rnnmodel = getModel(args, inputLength, outputLength, len(vocabDict), len(pred_vocabDict), embd=embdw2v)
-
+	if args.load_model_weights:
+		rnnmodel.load_weights(args.load_model_weights)
+		logger.info('Loaded model from saved weights')
+		
 	if args.optimizer == 'rmsprop':
 		from keras.optimizers import RMSprop
 		optimizer = RMSprop(lr=args.learning_rate)

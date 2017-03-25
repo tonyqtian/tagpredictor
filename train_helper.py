@@ -28,8 +28,6 @@ parser.add_argument("--eval-batch-size", dest="eval_batch_size", type=int, metav
 parser.add_argument("--dropout", dest="dropout_prob", type=float, metavar='<float>', default=0.4, help="The dropout probability. To disable, give a negative number (default=0.4)")
 parser.add_argument("--dropout-w", dest="dropout_w", type=float, metavar='<float>', default=0.3, help="The dropout probability of RNN W. To disable, give a negative number (default=0.4)")
 parser.add_argument("--dropout-u", dest="dropout_u", type=float, metavar='<float>', default=0.3, help="The dropout probability of RNN U. To disable, give a negative number (default=0.4)")
-parser.add_argument("--vocab-path", dest="vocab_path", type=str, metavar='<str>', default=None, help="(Optional) Path to the existing vocab file (*.pkl)")
-parser.add_argument("--embedding-path", dest="emb_path", type=str, metavar='<str>', default=None, help="(Optional) Path to the word embeddings file (Word2Vec format)")
 parser.add_argument("--epochs", dest="epochs", type=int, metavar='<int>', default=1, help="Number of epochs (default=50)")
 parser.add_argument("--seed", dest="seed", type=int, metavar='<int>', default=1111, help="Random seed (default=1234)")
 parser.add_argument("--plot", dest="plot", action='store_true', help="Save PNG plot")
@@ -47,6 +45,9 @@ parser.add_argument("--attention", dest="attention", action='store_true', help="
 parser.add_argument("--save-model", dest="save_model", action='store_true', help="Save Model Parameters")
 parser.add_argument("--model", dest="model", type=str, metavar='<str>', default='seq2seq', help="Model Type: seq2seq, categ")
 parser.add_argument("--bi-directional", dest="bidirectional", action='store_true', help="Use Bi-directional RNN")
+parser.add_argument("--load-model-json", dest="load_model_json", type=str, metavar='<str>', default=None, help="(Optional) Path to the existing model json")
+parser.add_argument("--load-model-weights", dest="load_model_weights", type=str, metavar='<str>', default=None, help="(Optional) Path to the existing model weights")
+parser.add_argument("--load-vocab-from-file", dest="load_vocab_from_file", type=str, metavar='<str>', default=None, help="(Optional) Path to the existing vocab file")
 args = parser.parse_args()
 
 from src.processing import train
